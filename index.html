@@ -292,6 +292,7 @@
         /* ─── INLINE ALERT ─── */
         #inlineAlert { display:none; max-width:580px; margin:0 auto 18px; padding:13px 18px; border-radius:14px; font-size:13px; font-weight:600; }
     </style>
+<script src="https://web.squarecdn.com/v1/square.js"></script>
 </head>
 <body>
 
@@ -443,6 +444,21 @@
         <p class="success-msg" id="successMsg"></p>
     </div>
 
+    <!-- ── PAYMENT MODAL ── -->
+    <div id="paymentModal" style="display:none;position:fixed;inset:0;background:rgba(15,43,34,0.75);z-index:500;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#FFFEF7;border-radius:20px;padding:28px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <p style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:#0f2b22;margin-bottom:4px;">Complete Payment</p>
+            <p id="paymentSummary" style="font-size:13px;color:#7a8a7e;margin-bottom:20px;"></p>
+            <div id="apple-pay-container" style="margin-bottom:12px;"></div>
+            <div id="google-pay-container" style="margin-bottom:12px;"></div>
+            <div id="wallet-divider" style="display:none;text-align:center;font-size:12px;color:#7a8a7e;margin-bottom:12px;">— or pay with card —</div>
+            <div id="card-container" style="margin-bottom:16px;"></div>
+            <p id="paymentError" style="font-size:12px;color:#991b1b;margin-bottom:12px;display:none;"></p>
+            <button id="payBtn" style="width:100%;padding:14px;background:#1B4D3E;color:#FFFDD0;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;" onclick="handleCardPayment()">Pay with Card</button>
+            <button onclick="closePayment()" style="width:100%;padding:10px;background:transparent;border:none;color:#7a8a7e;font-size:13px;cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
     <!-- ── ORDER ── -->
     <div style="max-width:880px;margin:0 auto 16px">
         <div style="background:rgba(27,77,62,0.06);border:1px solid rgba(27,77,62,0.12);border-radius:16px;padding:12px 18px;display:flex;align-items:center;gap:10px">
@@ -579,8 +595,12 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbz3AEElgwAGalu-tPqBHDq_jWpzKwR0BFB7A5jUpbSdV4SsNAISuwLKJcbX2fgWdL6T/exec';
-let pendingOrder = null;
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx3aKu1p9n4s6qrOdjk_M45DOdDJKiChHRP15YW7dd7rX_fZ4i2x49pecY7nMGqvvXK/exec';
+const SQUARE_APP_ID      = 'sq0idp-atvz6ChSNNKN4CJyKzOLEA';
+const SQUARE_LOCATION_ID = 'L2402Y9TAFK5H';
+let squarePayments = null;
+let squareCard     = null;
+let pendingOrder   = null;
 const TOTAL     = 30;
 const MAX_ORDER = 6;
 const DROP_OPEN   = new Date('2026-05-25T00:00:00');
@@ -764,46 +784,117 @@ function submitOrder() {
         return;
     }
 
-    // Disable button while submitting
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Placing order…';
-
-    const payload = {
+    // Build pending order and show payment modal
+    pendingOrder = {
         name: name.value.trim(), email: emailVal,
         phone: phone.value.trim(), pickup,
         chocolate_chunk: cart.A, snickerdoodle: cart.B,
         total_cookies: qty, timestamp: new Date().toISOString()
     };
 
-    fetch(SHEET_URL, { method: 'POST', body: JSON.stringify(payload) })
-    .then(r => r.json())
-    .then(res => {
-        btn.disabled = false;
-        btn.textContent = 'Reserve Your Cookies';
+    const parts = [];
+    if (cart.A > 0) parts.push(`${cart.A}× Chocolate Chunk`);
+    if (cart.B > 0) parts.push(`${cart.B}× Snickerdoodle`);
+    document.getElementById('paymentSummary').textContent = `${parts.join(' & ')} — $${qty}.00`;
+    document.getElementById('paymentError').style.display = 'none';
+    document.getElementById('paymentModal').style.display = 'flex';
+    initPaymentForm(qty);
+}
 
-        if (res.result === 'soldout') {
-            showInlineAlert(`Sorry, ${res.flavor} just sold out! Adjust your order.`, 'error');
+async function initPaymentForm(qty) {
+    if (!squarePayments) {
+        squarePayments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+    }
+
+    // Card
+    if (!squareCard) {
+        squareCard = await squarePayments.card();
+        await squareCard.attach('#card-container');
+    }
+
+    // Apple Pay / Google Pay
+    const paymentRequest = squarePayments.paymentRequest({
+        countryCode: 'US', currencyCode: 'USD',
+        total: { amount: String(qty * 100), label: "Hunter's Cookies" }
+    });
+
+    try {
+        const applePay = await squarePayments.applePay(paymentRequest);
+        const appleBtn = document.getElementById('apple-pay-container');
+        const applePayBtn = await applePay.createButton({ onClick: () => handleWalletPayment(applePay) });
+        appleBtn.innerHTML = '';
+        appleBtn.appendChild(applePayBtn);
+        document.getElementById('wallet-divider').style.display = 'block';
+    } catch(e) { /* Apple Pay not available */ }
+
+    try {
+        const googlePay = await squarePayments.googlePay(paymentRequest);
+        const googleBtn = document.getElementById('google-pay-container');
+        const googlePayBtn = await googlePay.createButton({ onClick: () => handleWalletPayment(googlePay) });
+        googleBtn.innerHTML = '';
+        googleBtn.appendChild(googlePayBtn);
+        document.getElementById('wallet-divider').style.display = 'block';
+    } catch(e) { /* Google Pay not available */ }
+}
+
+async function handleWalletPayment(walletMethod) {
+    try {
+        const result = await walletMethod.tokenize();
+        if (result.status === 'OK') await processPayment(result.token);
+    } catch(e) {
+        showPaymentError('Payment cancelled or failed. Please try again.');
+    }
+}
+
+async function handleCardPayment() {
+    const btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.textContent = 'Processing…';
+    try {
+        const result = await squareCard.tokenize();
+        if (result.status === 'OK') {
+            await processPayment(result.token);
+        } else {
+            showPaymentError(result.errors?.[0]?.message || 'Card error. Please check your details.');
+        }
+    } catch(e) {
+        showPaymentError('Something went wrong. Please try again.');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Pay with Card';
+}
+
+async function processPayment(token) {
+    pendingOrder.payment_token = token;
+    pendingOrder.amount_cents  = pendingOrder.total_cookies * 100;
+
+    try {
+        const res  = await fetch(SHEET_URL, { method: 'POST', body: JSON.stringify(pendingOrder) });
+        const data = await res.json();
+
+        if (data.result === 'soldout') {
+            closePayment();
+            showInlineAlert(`Sorry, ${data.flavor} just sold out! Adjust your order.`, 'error');
             return;
         }
-        if (res.result === 'error') {
-            showInlineAlert('Something went wrong. Please try again.', 'error');
+        if (data.result !== 'success') {
+            showPaymentError(data.message || 'Payment failed. Please try again.');
             return;
         }
 
-        // Commit locally
-        inventory.A -= cart.A;
-        inventory.B -= cart.B;
-        usedEmails.add(emailVal);
-
-        // Show success
+        // Success!
+        closePayment();
+        inventory.A -= pendingOrder.chocolate_chunk;
+        inventory.B -= pendingOrder.snickerdoodle;
+        usedEmails.add(pendingOrder.email);
         hideInlineAlert();
+
         const orderParts = [];
-        if (cart.A > 0) orderParts.push(`${cart.A}× Chocolate Chunk`);
-        if (cart.B > 0) orderParts.push(`${cart.B}× Snickerdoodle`);
-        document.getElementById('successTitle').textContent = 'Order Received!';
+        if (pendingOrder.chocolate_chunk > 0) orderParts.push(`${pendingOrder.chocolate_chunk}× Chocolate Chunk`);
+        if (pendingOrder.snickerdoodle  > 0) orderParts.push(`${pendingOrder.snickerdoodle}× Snickerdoodle`);
+        document.getElementById('successTitle').textContent = 'Order & Payment Confirmed!';
         document.getElementById('successMsg').innerHTML =
-            `<strong>${orderParts.join(' &amp; ')}</strong> — ${qty} cookie${qty>1?'s':''} for $${qty}.00<br><br>A Square invoice has been sent to <strong>${emailVal}</strong>. Pay it to confirm your spot — pickup location included!`;
+            `<strong>${orderParts.join(' &amp; ')}</strong> — ${pendingOrder.total_cookies} cookie${pendingOrder.total_cookies>1?'s':''} for $${pendingOrder.total_cookies}.00<br><br>Payment received! You will get a follow up email with your pickup location.`;
 
         document.getElementById('successBanner').classList.add('show');
         document.getElementById('orderArea').style.opacity = '0.4';
@@ -818,12 +909,20 @@ function submitOrder() {
             if (inventory[f] <= 0) document.getElementById('soldOut'+f).style.display = 'inline-block';
         });
         renderCart(); updateStickyCart(); checkFullSoldOut();
-    })
-    .catch(() => {
-        btn.disabled = false;
-        btn.textContent = 'Reserve Your Cookies';
-        showInlineAlert('Network error. Please check your connection and try again.', 'error');
-    });
+
+    } catch(e) {
+        showPaymentError('Network error. Please check your connection and try again.');
+    }
+}
+
+function closePayment() {
+    document.getElementById('paymentModal').style.display = 'none';
+}
+
+function showPaymentError(msg) {
+    const el = document.getElementById('paymentError');
+    el.textContent = msg;
+    el.style.display = 'block';
 }
 
 // ── LIVE INVENTORY LOAD ───────────────────────
