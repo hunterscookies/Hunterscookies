@@ -603,7 +603,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwCM5wo0ikod-ueHox20VbIRRg6ovn2jp6HyuTFOUARHPTBNQ-e8gXgJs9P99kMwEb1/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzhl4gstvAFRu_0eeWSVd6o0RZpvzFfOrjFAEZsYiMOyBFi-GMkZwUN6ZGQXTYmdKbX/exec';
 const SQUARE_APP_ID      = 'sq0idp-atvz6ChSNNKN4CJyKzOLEA';
 const SQUARE_LOCATION_ID = 'L2402Y9TAFK5H';
 let squarePayments = null;
@@ -878,9 +878,34 @@ async function handleCouponOrder() {
     const btn = document.getElementById('payBtn');
     btn.disabled = true;
     btn.textContent = 'Placing Order…';
-    await processPayment('COUPON-CECI');
-    btn.disabled = false;
-    btn.textContent = 'Place Order (Free)';
+
+    // Bypass Square — just run the success flow directly
+    closePayment();
+    inventory.A -= pendingOrder.chocolate_chunk;
+    inventory.B -= pendingOrder.snickerdoodle;
+    usedEmails.add(pendingOrder.email);
+    hideInlineAlert();
+
+    const orderParts = [];
+    if (pendingOrder.chocolate_chunk > 0) orderParts.push(`${pendingOrder.chocolate_chunk}× Chocolate Chunk`);
+    if (pendingOrder.snickerdoodle  > 0) orderParts.push(`${pendingOrder.snickerdoodle}× Snickerdoodle`);
+    document.getElementById('successTitle').textContent = 'Order Confirmed!';
+    document.getElementById('successMsg').innerHTML =
+        `<strong>${orderParts.join(' &amp; ')}</strong> — ${pendingOrder.total_cookies} cookie${pendingOrder.total_cookies>1?'s':''}<br><br>You will get a follow up email with your pickup location.`;
+
+    document.getElementById('successBanner').classList.add('show');
+    document.getElementById('orderArea').style.opacity = '0.4';
+    document.getElementById('orderArea').style.pointerEvents = 'none';
+    document.getElementById('successBanner').scrollIntoView({ behavior:'smooth', block:'center' });
+
+    cart = { A:0, B:0 };
+    ['A','B'].forEach(f => {
+        document.querySelectorAll(`#chips${f} .chip`).forEach(c => {
+            c.classList.toggle('active', parseInt(c.dataset.qty) === 0);
+        });
+        if (inventory[f] <= 0) document.getElementById('soldOut'+f).style.display = 'inline-block';
+    });
+    renderCart(); updateStickyCart(); checkFullSoldOut();
 }
 
 async function handleCardPayment() {
