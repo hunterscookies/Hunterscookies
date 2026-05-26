@@ -930,7 +930,7 @@ function renderCart() {
         lines.innerHTML = '<p class="cart-empty"></p>';
         total.textContent = '$0.00';
         renderCartSummary(0);
-        updateApplePayAmount(0);
+        setTimeout(() => updateApplePayAmount(0), 0);
         return;
     }
 
@@ -957,7 +957,7 @@ function renderCart() {
     lines.innerHTML = html;
     total.textContent = `${qty} cookie${qty>1?'s':''} — $${qty}.00`;
     renderCartSummary(qty);
-    updateApplePayAmount(qty);
+    setTimeout(() => updateApplePayAmount(qty), 0);
 }
 
 function renderCartSummary(qty) { /* removed — summary lives in Reserve Your Cookies only */ }
