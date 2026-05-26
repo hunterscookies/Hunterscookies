@@ -292,6 +292,7 @@
         /* ─── INLINE ALERT ─── */
         #inlineAlert { display:none; max-width:580px; margin:0 auto 18px; padding:13px 18px; border-radius:14px; font-size:13px; font-weight:600; }
     </style>
+<script src="https://web.squarecdn.com/v1/square.js"></script>
 </head>
 <body>
 
@@ -443,6 +444,18 @@
         <p class="success-msg" id="successMsg"></p>
     </div>
 
+    <!-- ── PAYMENT MODAL ── -->
+    <div id="paymentModal" style="display:none;position:fixed;inset:0;background:rgba(15,43,34,0.75);z-index:500;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#FFFEF7;border-radius:20px;padding:28px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <p style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:#0f2b22;margin-bottom:4px;">Complete Payment</p>
+            <p id="paymentSummary" style="font-size:13px;color:#7a8a7e;margin-bottom:20px;"></p>
+            <div id="card-container" style="margin-bottom:16px;min-height:89px;"></div>
+            <p id="paymentError" style="font-size:12px;color:#991b1b;margin-bottom:12px;display:none;"></p>
+            <button id="payBtn" style="width:100%;padding:14px;background:#1B4D3E;color:#FFFDD0;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;" onclick="handlePayment()">Pay Now</button>
+            <button onclick="closePayment()" style="width:100%;padding:10px;background:transparent;border:none;color:#7a8a7e;font-size:13px;cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
     <!-- ── ORDER ── -->
     <div style="max-width:880px;margin:0 auto 16px">
         <div style="background:rgba(27,77,62,0.06);border:1px solid rgba(27,77,62,0.12);border-radius:16px;padding:12px 18px;display:flex;align-items:center;gap:10px">
@@ -580,6 +593,10 @@
 <script>
 // ── CONFIG ────────────────────────────────────
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxepozrPdCGWqDMtJHh2DKIJnqoG9i6kd4lSgBnYVM7e1axAgjXZh5jioGBqNyi4qob/exec';
+const SQUARE_APP_ID = 'sq0idp-atvz6ChSNNKN4CJyKzOLEA';
+const SQUARE_LOCATION_ID = 'L2402Y9TAFK5H';
+let squareCard = null;
+let pendingOrder = null;
 const TOTAL     = 30;
 const MAX_ORDER = 6;
 const DROP_OPEN   = new Date('2026-05-25T21:26:00');
@@ -763,49 +780,83 @@ function submitOrder() {
         return;
     }
 
-    // Disable button while submitting
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Placing order…';
-
-    const payload = {
+    // Store order and show payment modal
+    pendingOrder = {
         name: name.value.trim(), email: emailVal,
         phone: phone.value.trim(), pickup,
         chocolate_chunk: cart.A, snickerdoodle: cart.B,
         total_cookies: qty, timestamp: new Date().toISOString()
     };
 
-    fetch(SHEET_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(res => {
-        btn.disabled = false;
-        btn.textContent = 'Claim My Spot';
-
-        if (res.result === 'soldout') {
-            showInlineAlert(`Sorry, ${res.flavor} just sold out! Adjust your order.`, 'error');
-            return;
-        }
-        if (res.result === 'error') {
-            showInlineAlert('Something went wrong. Please try again.', 'error');
-            return;
-        }
-
-        // Commit locally
-        inventory.A -= cart.A;
-        inventory.B -= cart.B;
-        usedEmails.add(emailVal);
-
-        // Show success state
-        hideInlineAlert();
     const parts = [];
     if (cart.A > 0) parts.push(`${cart.A}× Chocolate Chunk`);
     if (cart.B > 0) parts.push(`${cart.B}× Snickerdoodle`);
+    document.getElementById('paymentSummary').textContent = `${parts.join(' & ')} — $${qty}.00`;
+    document.getElementById('paymentModal').style.display = 'flex';
+    document.getElementById('paymentError').style.display = 'none';
+
+    if (!squareCard) {
+        const payments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+        payments.card().then(card => {
+            squareCard = card;
+            squareCard.attach('#card-container');
+        });
+    }
+}
+
+async function handlePayment() {
+    const btn = document.getElementById('payBtn');
+    const errEl = document.getElementById('paymentError');
+    btn.disabled = true;
+    btn.textContent = 'Processing…';
+    errEl.style.display = 'none';
+
+    try {
+        const result = await squareCard.tokenize();
+        if (result.status !== 'OK') {
+            errEl.textContent = result.errors?.[0]?.message || 'Card error. Please check your details.';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Pay Now';
+            return;
+        }
+
+        pendingOrder.payment_token = result.token;
+        pendingOrder.amount_cents = pendingOrder.total_cookies * 100;
+
+        const res = await fetch(SHEET_URL, { method: 'POST', body: JSON.stringify(pendingOrder) });
+        const data = await res.json();
+
+        btn.disabled = false;
+        btn.textContent = 'Pay Now';
+
+        if (data.result === 'soldout') {
+            closePayment();
+            showInlineAlert(`Sorry, ${data.flavor} just sold out! Adjust your order.`, 'error');
+            return;
+        }
+        if (data.result !== 'success') {
+            errEl.textContent = data.message || 'Payment failed. Please try again.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        closePayment();
+
+        // Commit locally
+        const name = document.getElementById('custName');
+        inventory.A -= pendingOrder.chocolate_chunk;
+        inventory.B -= pendingOrder.snickerdoodle;
+        usedEmails.add(pendingOrder.email);
+
+        // Show success state
+        hideInlineAlert();
+    const orderParts = [];
+    if (pendingOrder.chocolate_chunk > 0) orderParts.push(`${pendingOrder.chocolate_chunk}× Chocolate Chunk`);
+    if (pendingOrder.snickerdoodle > 0) orderParts.push(`${pendingOrder.snickerdoodle}× Snickerdoodle`);
     document.getElementById('successTitle').textContent = `Order Successful!`;
     document.getElementById('successMsg').innerHTML =
-        `<strong>${parts.join(' &amp; ')}</strong> — ${qty} cookie${qty>1?'s':''} for $${qty}.00<br><br>You will receive a follow up email with pickup location and link to pay.`;
+        `<strong>${orderParts.join(' &amp; ')}</strong> — ${pendingOrder.total_cookies} cookie${pendingOrder.total_cookies>1?'s':''} for $${pendingOrder.total_cookies}.00<br><br>Payment confirmed! You will receive a follow up email with your pickup location.`;
 
     document.getElementById('successBanner').classList.add('show');
     document.getElementById('orderArea').style.opacity = '0.4';
@@ -841,6 +892,11 @@ fetch(SHEET_URL)
         checkFullSoldOut();
     })
     .catch(() => { /* use default inventory if fetch fails */ });
+
+// ── PAYMENT HELPERS ──────────────────────────
+function closePayment() {
+    document.getElementById('paymentModal').style.display = 'none';
+}
 
 // ── SOLD OUT OVERLAY ─────────────────────────
 function checkFullSoldOut() {
