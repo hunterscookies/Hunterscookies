@@ -640,7 +640,7 @@ function tick() {
     const sub = document.getElementById('cdSub');
 
     if (diff <= 0 && now < ORDER_CLOSE) {
-        lbl.innerHTML = '<span style="color:#a3e0b0;letter-spacing:0.1em">● Drop Is Live — Order Now!</span>';
+        lbl.innerHTML = '<span style="color:#a3e0b0;font-size:1.6rem;font-weight:800;letter-spacing:0.04em;text-transform:none;line-height:1.2;display:block">● Drop Is Live — Order Now!</span>';
         set('00','00','00','00');
         sub.textContent = 'Open until sold out — or Thursday, May 29 at 8:00 PM';
         return;
