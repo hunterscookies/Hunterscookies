@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hunter's Cookies | Founder's Drop — $1 / Cookie</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-    <script src="https://web.squarecdn.com/v1/square.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
@@ -266,23 +266,15 @@
         .submit-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
         /* Apple Pay */
-        #applePayBtn {
-            -webkit-appearance: -apple-pay-button;
-            -apple-pay-button-type: buy;
-            -apple-pay-button-style: black;
+        #payment-request-button {
             width: 100%;
-            height: 54px;
-            border-radius: 14px;
-            border: none;
-            cursor: pointer;
-            display: block;
+            margin-bottom: 8px;
         }
-        #applePayBtn:disabled { opacity: 0.5; cursor: not-allowed; }
         #applePayNote {
             text-align: center;
             font-size: 10px;
             color: var(--muted);
-            margin-top: 8px;
+            margin-top: 4px;
             letter-spacing: 0.04em;
         }
         .pay-divider {
@@ -608,18 +600,18 @@
 
                 <!-- Apple Pay (shown when available) -->
                 <div id="applePayContainer" style="display:none;">
-                    <button id="applePayBtn" onclick="handleApplePayClick()" disabled></button>
+                    <div id="payment-request-button"></div>
                     <p id="applePayNote">Secure payment via Apple Pay · $1 per cookie</p>
                 </div>
 
                 <!-- Card Payment -->
                 <div id="cardContainer">
-                    <div class="pay-divider" id="payDivider">or pay by card</div>
+                    <div class="pay-divider" id="payDivider">Pay:</div>
                     <div id="card-container"></div>
                     <button id="cardPayBtn" onclick="handleCardPayClick()" disabled>
-                        Pay $0.00
+                        Confirm Order
                     </button>
-                    <p id="applePayNote" style="text-align:center;font-size:10px;color:var(--muted);margin-top:8px;letter-spacing:0.04em;">Secure · Powered by Square</p>
+                    <p style="text-align:center;font-size:10px;color:var(--muted);margin-top:8px;letter-spacing:0.04em;">Secure · Powered by Stripe</p>
                 </div>
 
                 <p class="footer-note">
@@ -652,7 +644,7 @@
     <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(255,253,208,0.7);margin:0;">
         🔒 Preview only — ordering opens <strong style="color:#FFFDD0;">today at 11:25 AM</strong>
     </p>
-    <button onclick="isPeeking=false;document.getElementById('peekBanner').style.display='none';document.getElementById('lockOverlay').style.display='flex';document.getElementById('cardPayBtn').textContent='Pay $0.00';document.getElementById('cardPayBtn').disabled=true;" style="
+    <button onclick="isPeeking=false;document.getElementById('peekBanner').style.display='none';document.getElementById('lockOverlay').style.display='flex';document.getElementById('cardPayBtn').textContent='Confirm Order';document.getElementById('cardPayBtn').disabled=true;" style="
         background:transparent; border:1px solid rgba(255,253,208,0.25);
         color:rgba(255,253,208,0.6); font-family:'DM Sans',sans-serif;
         font-size:11px; font-weight:600; letter-spacing:0.06em;
@@ -662,11 +654,10 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyindyM0QFqjLNwEC8MkqH-8skZNBifaTreVypaORrynwqAXTDr24VUxYpZu0W0P7XW/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwJRwsxfrU0EWLhODJ4EVpREXBM3mmDLpIpbzLrIigqcZI6dBElpDK4oZWBfhojSH5k/exec';
 
-// ── SQUARE CONFIG — replace with your real credentials ────
-const SQUARE_APP_ID      = 'sq0idp-BQnJSEmSvkuqDfrzzufagQ';
-const SQUARE_LOCATION_ID = 'L2402Y9TAFK5H';
+// ── STRIPE CONFIG ────
+const STRIPE_KEY = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL     = 30;
 const MAX_ORDER = 6;
 const DROP_OPEN   = new Date('2026-05-26T13:30:00');
@@ -677,50 +668,69 @@ let usedEmails = new Set();
 let cart = { A: 0, B: 0 };
 let orderPlaced = false;
 
-// ── SQUARE / APPLE PAY / CARD ───────────────────────
-let squarePayments   = null;
-let squareApplePay   = null;
-let squarePayRequest = null;
-let squareCard       = null;
+// ── STRIPE / APPLE PAY / CARD ───────────────────────
+let stripe               = null;
+let stripeCard           = null;
+let stripePaymentRequest = null;
 
-async function initSquare() {
-    if (!window.Square) return;
+async function initStripe() {
+    if (!window.Stripe) return;
     try {
-        squarePayments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+        stripe = Stripe(STRIPE_KEY);
+        const elements = stripe.elements();
 
-        // Card payment (always)
-        squareCard = await squarePayments.card();
-        await squareCard.attach('#card-container');
+        // Card element
+        stripeCard = elements.create('card', {
+            style: {
+                base: {
+                    fontFamily: '"DM Sans", sans-serif',
+                    fontSize: '16px',
+                    color: '#18211e',
+                    '::placeholder': { color: '#7a8a7e' }
+                }
+            }
+        });
+        stripeCard.mount('#card-container');
 
-        // Apple Pay (only if supported)
-        try {
-            squarePayRequest = squarePayments.paymentRequest({
-                countryCode: 'US', currencyCode: 'USD',
-                total: { amount: '0.00', label: "Hunter's Cookies" }
+        // Payment Request (Apple Pay)
+        stripePaymentRequest = stripe.paymentRequest({
+            country: 'US', currency: 'usd',
+            total: { label: "Hunter's Cookies", amount: 100 },
+            requestPayerName: false, requestPayerEmail: false,
+        });
+
+        const canMake = await stripePaymentRequest.canMakePayment();
+        if (canMake && canMake.applePay) {
+            const prButton = elements.create('paymentRequestButton', {
+                paymentRequest: stripePaymentRequest,
+                style: { paymentRequestButton: { type: 'buy', theme: 'dark', height: '54px' } }
             });
-            squareApplePay = await squarePayments.applePay(squarePayRequest);
+            prButton.mount('#payment-request-button');
             document.getElementById('applePayContainer').style.display = 'block';
-        } catch (e) { /* Apple Pay not available */ }
+        }
+
+        stripePaymentRequest.on('paymentmethod', async (ev) => {
+            if (!validateOrderForm()) { ev.complete('fail'); return; }
+            const success = await processStripePayment(ev.paymentMethod.id);
+            ev.complete(success ? 'success' : 'fail');
+        });
 
     } catch (e) {
-        console.error('Square init error:', e);
+        console.error('Stripe init error:', e);
     }
 }
 
 function updateApplePayAmount(qty) {
     const cardBtn = document.getElementById('cardPayBtn');
     if (qty === 0) {
-        if (squarePayRequest) document.getElementById('applePayBtn').disabled = true;
         cardBtn.disabled = true;
-        cardBtn.textContent = 'Pay $0.00';
+        cardBtn.textContent = 'Confirm Order';
+        if (stripePaymentRequest) stripePaymentRequest.update({ total: { label: "Hunter's Cookies", amount: 100 } });
         return;
     }
-    if (squarePayRequest) {
-        squarePayRequest.update({ total: { amount: qty.toFixed(2), label: "Hunter's Cookies" } });
-        document.getElementById('applePayBtn').disabled = false;
-    }
     cardBtn.disabled = false;
-    cardBtn.textContent = `Pay $${qty}.00`;
+    cardBtn.textContent = 'Confirm Order';
+    if (stripePaymentRequest) stripePaymentRequest.update({ total: { label: "Hunter's Cookies", amount: qty * 100 } });
 }
 
 async function handleCardPayClick() {
@@ -734,18 +744,17 @@ async function handleCardPayClick() {
     btn.textContent = 'Processing…';
 
     try {
-        const result = await squareCard.tokenize();
-        if (result.status !== 'OK') {
-            showInlineAlert('Card error: ' + (result.errors?.[0]?.message || 'Please check your card details.'), 'error');
-            btn.disabled = false;
-            btn.textContent = `Pay $${qty}.00`;
+        const { paymentMethod, error } = await stripe.createPaymentMethod({ type: 'card', card: stripeCard });
+        if (error) {
+            showInlineAlert(error.message || 'Card error. Please check your details.', 'error');
+            btn.disabled = false; btn.textContent = 'Confirm Order';
             return;
         }
-        await processSquarePayment(result.token);
+        const success = await processStripePayment(paymentMethod.id);
+        if (!success) { btn.disabled = false; btn.textContent = 'Confirm Order'; }
     } catch (e) {
         showInlineAlert('Something went wrong. Please try again.', 'error');
-        btn.disabled = false;
-        btn.textContent = `Pay $${qty}.00`;
+        btn.disabled = false; btn.textContent = 'Confirm Order';
     }
 }
 
@@ -774,28 +783,7 @@ function validateOrderForm() {
     return true;
 }
 
-async function handleApplePayClick() {
-    if (isPeeking) return;
-    if (!validateOrderForm()) return;
-
-    const btn = document.getElementById('applePayBtn');
-    btn.disabled = true;
-
-    try {
-        const result = await squareApplePay.tokenize();
-        if (result.status === 'OK') {
-            await processSquarePayment(result.token);
-        } else {
-            showInlineAlert('Apple Pay was cancelled. Please try again.', 'warn');
-            btn.disabled = false;
-        }
-    } catch (e) {
-        showInlineAlert('Apple Pay failed. Please try again or use the fallback below.', 'error');
-        btn.disabled = false;
-    }
-}
-
-async function processSquarePayment(token) {
+async function processStripePayment(paymentMethodId) {
     const name   = document.getElementById('custName').value.trim();
     const email  = document.getElementById('custEmail').value.trim().toLowerCase();
     const phone  = document.getElementById('custPhone').value.trim();
@@ -803,12 +791,10 @@ async function processSquarePayment(token) {
     const qty    = cart.A + cart.B;
 
     const payload = {
-        payment_token: token,
+        payment_method_id: paymentMethodId,
         name, email, phone, pickup,
-        chocolate_chunk: cart.A,
-        snickerdoodle: cart.B,
-        total_cookies: qty,
-        amount_cents: qty * 100,
+        chocolate_chunk: cart.A, snickerdoodle: cart.B,
+        total_cookies: qty, amount_cents: qty * 100,
         timestamp: new Date().toISOString()
     };
 
@@ -818,26 +804,15 @@ async function processSquarePayment(token) {
 
         if (res.result === 'soldout') {
             showInlineAlert(`Sorry, ${res.flavor} just sold out! Adjust your order.`, 'error');
-            document.getElementById('applePayBtn').disabled = false;
-            const qty = cart.A + cart.B;
-            const cb = document.getElementById('cardPayBtn');
-            cb.disabled = false; cb.textContent = `Pay $${qty}.00`;
-            return;
+            return false;
         }
         if (res.result === 'error' || res.result === 'payment_failed') {
             showInlineAlert('Payment failed. Please try again.', 'error');
-            document.getElementById('applePayBtn').disabled = false;
-            const qty = cart.A + cart.B;
-            const cb = document.getElementById('cardPayBtn');
-            cb.disabled = false; cb.textContent = `Pay $${qty}.00`;
-            return;
+            return false;
         }
 
-        // Success
-        inventory.A -= cart.A;
-        inventory.B -= cart.B;
-        usedEmails.add(email);
-        hideInlineAlert();
+        inventory.A -= cart.A; inventory.B -= cart.B;
+        usedEmails.add(email); hideInlineAlert();
 
         const parts = [];
         if (cart.A > 0) parts.push(`${cart.A}× Chocolate Chunk`);
@@ -859,13 +834,11 @@ async function processSquarePayment(token) {
             if (inventory[f] <= 0) document.getElementById('soldOut'+f).style.display = 'inline-block';
         });
         renderCart(); updateStickyCart();
+        return true;
 
     } catch (e) {
         showInlineAlert('Network error. Please check your connection and try again.', 'error');
-        document.getElementById('applePayBtn').disabled = false;
-        const qty = cart.A + cart.B;
-        const cb = document.getElementById('cardPayBtn');
-        cb.disabled = false; cb.textContent = `Pay $${qty}.00`;
+        return false;
     }
 }
 
@@ -879,8 +852,8 @@ function formatPhone(input) {
     input.value = formatted;
 }
 
-// Init Square on load
-initSquare();
+// Init Stripe on load
+initStripe();
 
 // ── PEEK MODE ─────────────────────────────────
 let isPeeking = false;
@@ -890,7 +863,6 @@ function peekAtOrdering() {
     document.getElementById('lockOverlay').style.display = 'none';
     document.getElementById('peekBanner').style.display = 'flex';
 
-    document.getElementById('applePayBtn').disabled = true;
     const cb = document.getElementById('cardPayBtn');
     cb.disabled = true;
     cb.textContent = 'Opens Tuesday, May 26 at 8:00 PM';
@@ -921,7 +893,7 @@ function peekAtOrdering() {
             isPeeking = false;
             const cb = document.getElementById('cardPayBtn');
             cb.disabled = (cart.A + cart.B === 0);
-            cb.textContent = `Pay $${cart.A + cart.B}.00`;
+            cb.textContent = 'Confirm Order';
         }
     }
     setInterval(checkLock, 1000);
