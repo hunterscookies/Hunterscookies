@@ -817,7 +817,6 @@ function peekAtOrdering() {
     isPeeking = true;
     document.getElementById('lockOverlay').style.display = 'none';
     document.getElementById('peekBanner').style.display = 'flex';
-    document.body.style.overflow = '';
 
     // Disable both order buttons
     const apBtn = document.getElementById('applePayBtn');
@@ -837,7 +836,6 @@ function peekAtOrdering() {
         if (now < DROP_OPEN) {
             if (!peeking) {
                 overlay.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
             }
             const diff = DROP_OPEN - now;
             const d = Math.floor(diff/86400000);
@@ -850,7 +848,6 @@ function peekAtOrdering() {
             document.getElementById('olSecs').textContent  = String(s).padStart(2,'0');
         } else {
             overlay.style.display = 'none';
-            document.body.style.overflow = '';
         }
     }
     setInterval(checkLock, 1000);
