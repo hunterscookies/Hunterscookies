@@ -349,7 +349,7 @@
             <div style="text-align:center"><div id="olSecs" style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;color:#FFFDD0;line-height:1">--</div><div style="font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,253,208,0.3);margin-top:2px">Secs</div></div>
         </div>
     </div>
-    <p style="font-size:12px;color:rgba(255,253,208,0.5);line-height:1.6;margin-bottom:10px">Tuesday, May 26 at 8:00 PM</p>
+    <p style="font-size:12px;color:rgba(255,253,208,0.5);line-height:1.6;margin-bottom:10px">Today at 11:20 AM</p>
     <!-- THIS DROP CARD -->
     <p style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:rgba(255,253,208,0.95);max-width:340px;width:100%;text-align:center;margin-bottom:6px">Founder's Drop</p>
     <div style="max-width:340px;width:100%;background:rgba(255,220,100,0.07);border:1.5px solid rgba(255,220,100,0.2);border-radius:16px;padding:14px 18px;text-align:left;margin-bottom:10px">
@@ -360,7 +360,7 @@
 
         <p style="font-size:12px;font-weight:700;color:rgba(255,253,208,0.85);margin-bottom:6px">📅 Order Window</p>
         <p style="font-size:12px;color:rgba(255,253,208,0.45);line-height:1.6;margin-bottom:10px">
-            <strong style="color:rgba(255,253,208,0.65)">Tuesday May 26 · 8:00 PM</strong> — Orders open<br>
+            <strong style="color:rgba(255,253,208,0.65)">Today · 11:20 AM</strong> — Orders open<br>
             <strong style="color:rgba(255,253,208,0.65)">Wednesday May 28 · 8:00 PM</strong> — Closes · or until <strong style="color:#f87171">sold out</strong>
         </p>
         <p style="font-size:12px;font-weight:700;color:rgba(255,253,208,0.85);margin-bottom:6px">📍 Pickup</p>
@@ -439,7 +439,7 @@
             <div class="cd-colon">:</div>
             <div class="cd-cell"><div class="cd-num" id="cdSecs">--</div><div class="cd-unit">Secs</div></div>
         </div>
-        <p class="cd-sub" id="cdSub">Opens Tuesday, May 26 at 8:00 PM</p>
+        <p class="cd-sub" id="cdSub">Opens Today at 11:20 AM</p>
     </section>
 
 
@@ -630,7 +630,7 @@
     gap:12px;
 ">
     <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(255,253,208,0.7);margin:0;">
-        🔒 Preview only — ordering opens <strong style="color:#FFFDD0;">tonight at 8:00 PM</strong>
+        🔒 Preview only — ordering opens <strong style="color:#FFFDD0;">today at 11:20 AM</strong>
     </p>
     <button onclick="isPeeking=false;document.getElementById('peekBanner').style.display='none';document.getElementById('lockOverlay').style.display='flex';document.getElementById('submitBtn').textContent='Reserve My Cookies';document.getElementById('submitBtn').disabled=false;" style="
         background:transparent; border:1px solid rgba(255,253,208,0.25);
@@ -649,7 +649,7 @@ const SQUARE_APP_ID      = 'sq0idp-BQnJSEmSvkuqDfrzzufagQ';
 const SQUARE_LOCATION_ID = 'L2402Y9TAFK5H';
 const TOTAL     = 30;
 const MAX_ORDER = 6;
-const DROP_OPEN   = new Date('2026-05-26T20:00:00');
+const DROP_OPEN   = new Date('2026-05-26T11:20:00');
 const ORDER_CLOSE = new Date('2026-05-28T20:00:00');
 
 let inventory  = { A: TOTAL, B: TOTAL };
@@ -817,7 +817,7 @@ function peekAtOrdering() {
     const subBtn = document.getElementById('submitBtn');
     apBtn.disabled = true;
     subBtn.disabled = true;
-    subBtn.textContent = 'Opens Tonight at 8:00 PM';
+    subBtn.textContent = 'Opens Today at 11:20 AM';
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -842,6 +842,9 @@ function peekAtOrdering() {
             document.getElementById('olSecs').textContent  = String(s).padStart(2,'0');
         } else {
             overlay.style.display = 'none';
+            isPeeking = false;
+            document.getElementById('submitBtn').textContent = 'Reserve My Cookies';
+            document.getElementById('submitBtn').disabled = false;
         }
     }
     setInterval(checkLock, 1000);
