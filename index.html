@@ -348,9 +348,10 @@
 
         <p style="font-size:12px;color:rgba(255,253,208,0.45);line-height:1.7;margin-bottom:12px"><strong style="color:rgba(255,253,208,0.65)">Chocolate Chunk</strong> + one <strong style="color:rgba(255,253,208,0.65)">rotating flavor</strong> each drop. Once <strong style="color:#f87171">sold out</strong>, that's it until the next drop.</p>
 
-        <p style="font-size:12px;color:rgba(255,253,208,0.45);line-height:1.8;margin-bottom:12px">
-            When a drop is live: orders open Tuesday 8 AM — closes Wednesday 8 PM or until sold out.<br>
-            <strong style="color:rgba(255,253,208,0.6)">Pickup</strong> — Sat & Sun · 10 AM–12 PM or 2 PM–4 PM
+        <p style="font-size:12px;color:rgba(255,253,208,0.45);line-height:1.8;margin-bottom:6px">
+            <strong style="color:rgba(255,253,208,0.6)">During drop weeks:</strong><br>
+            📅 Ordering window: <strong style="color:rgba(255,253,208,0.65)">Tuesday 8 AM – Wednesday 8 PM</strong> or until sold out.<br>
+            📍 Pickup window: <strong style="color:rgba(255,253,208,0.65)">Saturday & Sunday · 10 AM–12 PM or 2 PM–4 PM</strong>
         </p>
 
         <p style="font-size:11px;color:rgba(255,253,208,0.3);line-height:1.5">📦 Pickup only · Danville, CA · Location in confirmation.</p>
@@ -410,8 +411,8 @@
         <div class="step">
             <div class="step-num">1</div>
             <div>
-                <h4>Orders Open — Tuesday 8:00 AM</h4>
-                <p>The weekly drop goes live every Tuesday morning. Each drop features our <strong>Chocolate Chunk</strong> as a staple plus <strong>one rotating flavor</strong> each week.</p>
+                <h4>Orders Open — During Drop Weeks</h4>
+                <p>During drop weeks, the ordering window opens <strong>Tuesday at 8:00 AM</strong> and closes <strong>Wednesday at 8:00 PM</strong> — or sooner if sold out. Each drop features <strong>Chocolate Chunk</strong> as a staple plus <strong>one rotating flavor</strong>.</p>
             </div>
         </div>
         <div class="step-line"></div>
@@ -427,7 +428,7 @@
             <div class="step-num">3</div>
             <div>
                 <h4>Pick Up — Saturday & Sunday</h4>
-                <p>Two windows each day: <strong>10 AM–12 PM</strong> or <strong>2 PM–4 PM</strong>. Location announced on confirmation. Unclaimed by Sunday 4 PM are forfeited.</p>
+                <p>During drop weeks, pickup is available <strong>Saturday & Sunday</strong>. Two windows each day: <strong>10 AM–12 PM</strong> or <strong>2 PM–4 PM</strong>. Location announced on confirmation. Unclaimed by Sunday 4 PM are forfeited.</p>
             </div>
         </div>
     </section>
@@ -452,7 +453,7 @@
     <div class="order-layout" id="orderArea">
 
         <!-- Menu -->
-        <div>
+        <div style="position:relative;">
             <p class="sec-label" style="margin-bottom:12px">This Week's Menu</p>
 
             <!-- Chocolate Chunk -->
@@ -505,6 +506,13 @@
             </div>
         </div>
 
+        <!-- Sold Out Overlay -->
+        <div id="soldOutOverlay" style="display:none; position:absolute; inset:0; background:rgba(255,251,234,0.93); border-radius:16px; z-index:10; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 20px;">
+            <p style="font-size:2.5rem; margin-bottom:12px;">🍪</p>
+            <p style="font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:700; color:#0f2b22; margin-bottom:10px;">Sold Out</p>
+            <p style="font-size:14px; color:#7a8a7e; line-height:1.6;">Every cookie from this drop has been claimed.<br>We hope to see you for the next drop!</p>
+        </div>
+
         <!-- Cart Summary Bar -->
         <div id="cartSummaryBar" style="display:none; grid-column:1/-1; background:var(--hg); color:var(--cream); border-radius:12px; padding:12px 18px; display:none; align-items:center; justify-content:space-between; gap:12px; margin-top:4px;">
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;" id="cartSummaryItems"></div>
@@ -540,7 +548,7 @@
                     </div>
                     <div class="fg">
                         <label>Mobile Number</label>
-                        <input id="custPhone" type="tel" placeholder="(925) 555-0199" autocomplete="tel">
+                        <input id="custPhone" type="tel" placeholder="(925) 555-0199" autocomplete="tel" oninput="formatPhone(this)">
                     </div>
                     <div class="fg">
                         <label>Pickup Window</label>
@@ -551,7 +559,7 @@
                 </div>
 
                 <button class="submit-btn" id="submitBtn" onclick="submitOrder()">
-                    Orders Open Tuesday May 26 at 8:00 AM
+                    Reserve Your Cookies
                 </button>
 
                 <p class="footer-note">
@@ -812,7 +820,7 @@ function submitOrder() {
         });
         if (inventory[f] <= 0) document.getElementById('soldOut'+f).style.display = 'inline-block';
     });
-        renderCart(); updateStickyCart();
+        renderCart(); updateStickyCart(); checkFullSoldOut();
     })
     .catch(() => {
         btn.disabled = false;
@@ -830,8 +838,29 @@ fetch(SHEET_URL)
         ['A','B'].forEach(f => {
             if (inventory[f] <= 0) document.getElementById('soldOut'+f).style.display = 'inline-block';
         });
+        checkFullSoldOut();
     })
     .catch(() => { /* use default inventory if fetch fails */ });
+
+// ── SOLD OUT OVERLAY ─────────────────────────
+function checkFullSoldOut() {
+    const overlay = document.getElementById('soldOutOverlay');
+    if (inventory.A <= 0 && inventory.B <= 0) {
+        overlay.style.display = 'flex';
+    } else {
+        overlay.style.display = 'none';
+    }
+}
+
+// ── PHONE FORMAT ─────────────────────────────
+function formatPhone(input) {
+    let digits = input.value.replace(/\D/g, '').slice(0, 10);
+    let formatted = '';
+    if (digits.length > 0) formatted = '(' + digits.slice(0, 3);
+    if (digits.length >= 4) formatted += ') ' + digits.slice(3, 6);
+    if (digits.length >= 7) formatted += '-' + digits.slice(6, 10);
+    input.value = formatted;
+}
 
 // ── ALERTS ────────────────────────────────────
 function showToast(msg, type) {
