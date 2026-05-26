@@ -453,15 +453,7 @@
             <div id="google-pay-container" style="margin-bottom:12px;"></div>
             <div id="wallet-divider" style="display:none;text-align:center;font-size:12px;color:#7a8a7e;margin-bottom:12px;">— or pay with card —</div>
             <div id="card-container" style="margin-bottom:16px;"></div>
-            <div style="margin-bottom:14px;">
-                <label style="display:block;font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(27,77,62,0.38);margin-bottom:6px;">Coupon Code (optional)</label>
-                <div style="display:flex;gap:8px;">
-                    <input id="couponInput" type="text" placeholder="Enter code" style="flex:1;padding:10px 14px;border:1px solid rgba(27,77,62,0.12);border-radius:10px;font-size:14px;outline:none;" />
-                    <button onclick="applyCoupon()" style="padding:10px 16px;background:#1B4D3E;color:#FFFDD0;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Apply</button>
-                </div>
-                <p id="couponMsg" style="font-size:12px;margin-top:6px;display:none;"></p>
-            </div>
-            <p id="paymentError" style="font-size:12px;color:#991b1b;margin-bottom:12px;display:none;"></p>
+<p id="paymentError" style="font-size:12px;color:#991b1b;margin-bottom:12px;display:none;"></p>
             <button id="payBtn" style="width:100%;padding:14px;background:#1B4D3E;color:#FFFDD0;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;" onclick="handleCardPayment()">Pay with Card</button>
             <button onclick="closePayment()" style="width:100%;padding:10px;background:transparent;border:none;color:#7a8a7e;font-size:13px;cursor:pointer;">Cancel</button>
         </div>
@@ -603,7 +595,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzhl4gstvAFRu_0eeWSVd6o0RZpvzFfOrjFAEZsYiMOyBFi-GMkZwUN6ZGQXTYmdKbX/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwtxS6-w-N4K-T9G9k3Dzx1znzVX4zDXS0CnEf7DiyE86v2Cb70Z9KYnkt2x3xn80TG/exec';
 const SQUARE_APP_ID      = 'sq0idp-atvz6ChSNNKN4CJyKzOLEA';
 const SQUARE_LOCATION_ID = 'L2402Y9TAFK5H';
 let squarePayments = null;
@@ -854,59 +846,6 @@ async function handleWalletPayment(walletMethod) {
     }
 }
 
-function applyCoupon() {
-    const code = document.getElementById('couponInput').value.trim().toUpperCase();
-    const msg = document.getElementById('couponMsg');
-    if (code === 'CECI') {
-        msg.textContent = 'Coupon applied! No payment needed.';
-        msg.style.color = '#1B4D3E';
-        msg.style.display = 'block';
-        document.getElementById('card-container').style.display = 'none';
-        document.getElementById('apple-pay-container').style.display = 'none';
-        document.getElementById('google-pay-container').style.display = 'none';
-        document.getElementById('wallet-divider').style.display = 'none';
-        document.getElementById('payBtn').textContent = 'Place Order (Free)';
-        document.getElementById('payBtn').onclick = handleCouponOrder;
-    } else {
-        msg.textContent = 'Invalid coupon code.';
-        msg.style.color = '#991b1b';
-        msg.style.display = 'block';
-    }
-}
-
-async function handleCouponOrder() {
-    const btn = document.getElementById('payBtn');
-    btn.disabled = true;
-    btn.textContent = 'Placing Order…';
-
-    // Bypass Square — just run the success flow directly
-    closePayment();
-    inventory.A -= pendingOrder.chocolate_chunk;
-    inventory.B -= pendingOrder.snickerdoodle;
-    usedEmails.add(pendingOrder.email);
-    hideInlineAlert();
-
-    const orderParts = [];
-    if (pendingOrder.chocolate_chunk > 0) orderParts.push(`${pendingOrder.chocolate_chunk}× Chocolate Chunk`);
-    if (pendingOrder.snickerdoodle  > 0) orderParts.push(`${pendingOrder.snickerdoodle}× Snickerdoodle`);
-    document.getElementById('successTitle').textContent = 'Order Confirmed!';
-    document.getElementById('successMsg').innerHTML =
-        `<strong>${orderParts.join(' &amp; ')}</strong> — ${pendingOrder.total_cookies} cookie${pendingOrder.total_cookies>1?'s':''}<br><br>You will get a follow up email with your pickup location.`;
-
-    document.getElementById('successBanner').classList.add('show');
-    document.getElementById('orderArea').style.opacity = '0.4';
-    document.getElementById('orderArea').style.pointerEvents = 'none';
-    document.getElementById('successBanner').scrollIntoView({ behavior:'smooth', block:'center' });
-
-    cart = { A:0, B:0 };
-    ['A','B'].forEach(f => {
-        document.querySelectorAll(`#chips${f} .chip`).forEach(c => {
-            c.classList.toggle('active', parseInt(c.dataset.qty) === 0);
-        });
-        if (inventory[f] <= 0) document.getElementById('soldOut'+f).style.display = 'inline-block';
-    });
-    renderCart(); updateStickyCart(); checkFullSoldOut();
-}
 
 async function handleCardPayment() {
     const btn = document.getElementById('payBtn');
