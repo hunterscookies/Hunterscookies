@@ -578,7 +578,7 @@
                     </div>
                     <div class="fg">
                         <label>Mobile Number</label>
-                        <input id="custPhone" type="tel" placeholder="(925) 555-0199" autocomplete="tel">
+                        <input id="custPhone" type="tel" placeholder="(925) 555-0199" autocomplete="tel" oninput="formatPhone(this)">
                     </div>
                     <div class="fg">
                         <label>Pickup Window</label>
@@ -642,7 +642,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwL3D9UrL6V4Re9V-ZTkeu5mrie3asyHehVXmbsvi3T9BsIlNqTStve6v5mtNaVfMvX/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyindyM0QFqjLNwEC8MkqH-8skZNBifaTreVypaORrynwqAXTDr24VUxYpZu0W0P7XW/exec';
 
 // ── SQUARE CONFIG — replace with your real credentials ────
 const SQUARE_APP_ID      = 'sq0idp-BQnJSEmSvkuqDfrzzufagQ';
@@ -799,6 +799,16 @@ async function processSquarePayment(token) {
         showInlineAlert('Network error. Please check your connection and try again.', 'error');
         document.getElementById('applePayBtn').disabled = false;
     }
+}
+
+// ── PHONE FORMATTER ───────────────────────────
+function formatPhone(input) {
+    let digits = input.value.replace(/\D/g, '').slice(0, 10);
+    let formatted = '';
+    if (digits.length > 0) formatted = '(' + digits.slice(0, 3);
+    if (digits.length >= 4) formatted += ') ' + digits.slice(3, 6);
+    if (digits.length >= 7) formatted += '-' + digits.slice(6, 10);
+    input.value = formatted;
 }
 
 // Init Square on load
