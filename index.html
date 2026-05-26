@@ -800,13 +800,14 @@ async function processStripePayment(paymentMethodId) {
     try {
         const r   = await fetch(SHEET_URL, { method: 'POST', body: JSON.stringify(payload) });
         const res = await r.json();
+        console.log('Apps Script response:', JSON.stringify(res));
 
         if (res.result === 'soldout') {
             showInlineAlert(`Sorry, ${res.flavor} just sold out! Adjust your order.`, 'error');
             return false;
         }
         if (res.result === 'error' || res.result === 'payment_failed') {
-            showInlineAlert('Payment failed. Please try again.', 'error');
+            showInlineAlert((res.message || 'Payment failed. Please try again.'), 'error');
             return false;
         }
 
