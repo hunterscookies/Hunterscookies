@@ -872,12 +872,13 @@ async function handlePayment() {
         if (inventory[f] <= 0) document.getElementById('soldOut'+f).style.display = 'inline-block';
     });
         renderCart(); updateStickyCart(); checkFullSoldOut();
-    })
-    .catch(() => {
+
+    } catch(err) {
         btn.disabled = false;
-        btn.textContent = 'Claim My Spot';
-        showInlineAlert('Network error. Please check your connection and try again.', 'error');
-    });
+        btn.textContent = 'Pay Now';
+        errEl.textContent = 'Network error. Please check your connection and try again.';
+        errEl.style.display = 'block';
+    }
 }
 
 // ── LIVE INVENTORY LOAD ───────────────────────
