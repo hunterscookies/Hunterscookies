@@ -189,24 +189,25 @@
         /* Chip selector */
         .chips-label { font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(27,77,62,0.5); margin-bottom:12px; margin-top:14px; }
         .chips { display:flex; gap:8px; flex-wrap:wrap; }
+        .chip-radio { display:none; }
         .chip {
+            display:inline-block;
             padding:11px 26px; border-radius:99px;
             font-size:14px; font-weight:700;
             cursor:pointer;
             border:2px solid rgba(27,77,62,0.2);
             color:var(--hg); background:#fff;
-            transition:none;
             font-family:'DM Sans',sans-serif;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
+            user-select:none;
         }
-        .chip:hover:not(.disabled) { background:rgba(27,77,62,0.06); border-color:var(--hg); }
-        .chip.active {
+        .chip-radio:checked + .chip {
             background:var(--hg); color:#FFFDD0;
             border-color:var(--hg);
             box-shadow:0 4px 16px rgba(27,77,62,0.35);
         }
-        .chip.disabled { opacity:0.3; cursor:not-allowed; }
+        .chip.disabled { opacity:0.3; pointer-events:none; }
 
         /* ─── ORDER SIDEBAR ─── */
         .sidebar-inner {
@@ -490,9 +491,10 @@
                 </div>
                 <p class="chips-label">Choose your pack size</p>
                 <div class="chips" id="chipsA">
-                    <button class="chip" data-qty="3" ontouchstart="pickPack('A',3,event)" onclick="pickPack('A',3,event)">3</button>
-                    <button class="chip" data-qty="6" ontouchstart="pickPack('A',6,event)" onclick="pickPack('A',6,event)">6</button>
-                    
+                    <input type="radio" name="qtyA" id="qtyA3" class="chip-radio" value="3" onchange="pickPack('A',3)">
+                    <label for="qtyA3" class="chip">3</label>
+                    <input type="radio" name="qtyA" id="qtyA6" class="chip-radio" value="6" onchange="pickPack('A',6)">
+                    <label for="qtyA6" class="chip">6</label>
                 </div>
             </div>
 
@@ -517,9 +519,10 @@
                 </div>
                 <p class="chips-label">Choose your pack size</p>
                 <div class="chips" id="chipsB">
-                    <button class="chip" data-qty="3" ontouchstart="pickPack('B',3,event)" onclick="pickPack('B',3,event)">3</button>
-                    <button class="chip" data-qty="6" ontouchstart="pickPack('B',6,event)" onclick="pickPack('B',6,event)">6</button>
-                    
+                    <input type="radio" name="qtyB" id="qtyB3" class="chip-radio" value="3" onchange="pickPack('B',3)">
+                    <label for="qtyB3" class="chip">3</label>
+                    <input type="radio" name="qtyB" id="qtyB6" class="chip-radio" value="6" onchange="pickPack('B',6)">
+                    <label for="qtyB6" class="chip">6</label>
                 </div>
             </div>
         </div>
@@ -737,28 +740,22 @@ function scrollToOrder() {
 }
 
 // ── PACK PICKER ───────────────────────────────
-function pickPack(flavor, qty, e) {
-    if (e && e.type === 'touchstart') { e.preventDefault(); }
+function pickPack(flavor, qty) {
     if (qty > 0 && qty > inventory[flavor]) return;
     const other = flavor === 'A' ? cart.B : cart.A;
 
-    // Toggle off if already selected
-    if (cart[flavor] === qty) {
-        cart[flavor] = 0;
-        document.querySelectorAll(`#chips${flavor} .chip`).forEach(c => c.classList.remove('active'));
-        renderCart();
-        updateStickyCart();
-        return;
-    }
-
     if (qty + other > MAX_ORDER) {
         showToast(`Max 6 cookies per drop. You already have ${other} from the other flavor.`, 'warn');
+        // Uncheck the radio
+        document.querySelectorAll(`#chips${flavor} .chip-radio`).forEach(r => {
+            if (parseInt(r.value) === qty) r.checked = false;
+        });
+        if (cart[flavor] > 0) {
+            document.querySelector(`#chips${flavor} .chip-radio[value="${cart[flavor]}"]`).checked = true;
+        }
         return;
     }
     cart[flavor] = qty;
-    document.querySelectorAll(`#chips${flavor} .chip`).forEach(c => {
-        c.classList.toggle('active', parseInt(c.dataset.qty) === qty);
-    });
     renderCart();
     updateStickyCart();
 }
