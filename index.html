@@ -187,19 +187,25 @@
         .tag-sold { background:#ef4444; color:#fff; display:none; }
 
         /* Chip selector */
-        .chips-label { font-size:9px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(27,77,62,0.35); margin-bottom:10px; }
+        .chips-label { font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(27,77,62,0.5); margin-bottom:12px; margin-top:14px; }
         .chips { display:flex; gap:8px; flex-wrap:wrap; }
         .chip {
-            padding:9px 20px; border-radius:99px;
-            font-size:12px; font-weight:700;
+            padding:11px 26px; border-radius:99px;
+            font-size:14px; font-weight:700;
             cursor:pointer;
-            border:1.5px solid rgba(27,77,62,0.16);
-            color:var(--hg); background:transparent;
-            transition:all 0.14s;
+            border:2px solid rgba(27,77,62,0.2);
+            color:var(--hg); background:#fff;
+            transition:all 0.12s ease;
             font-family:'DM Sans',sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
-        .chip:hover:not(.disabled) { background:rgba(27,77,62,0.06); border-color:rgba(27,77,62,0.3); }
-        .chip.active { background:var(--hg); color:var(--cream); border-color:var(--hg); box-shadow:0 3px 12px rgba(27,77,62,0.22); }
+        .chip:hover:not(.disabled) { background:rgba(27,77,62,0.06); border-color:var(--hg); }
+        .chip.active {
+            background:var(--hg); color:#FFFDD0;
+            border-color:var(--hg);
+            box-shadow:0 4px 16px rgba(27,77,62,0.35);
+            transform:scale(1.06);
+        }
         .chip.disabled { opacity:0.3; cursor:not-allowed; }
 
         /* ─── ORDER SIDEBAR ─── */
@@ -640,7 +646,7 @@ const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbx1ZMLL6BLArnMisRng
 const STRIPE_KEY  = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL       = 30;
 const MAX_ORDER   = 6;
-const DROP_OPEN   = new Date('2026-05-26T19:15:00');
+const DROP_OPEN   = new Date('2026-05-26T13:30:00');
 const ORDER_CLOSE = new Date('2026-05-28T20:00:00');
 const DISCOUNT_CODE = 'ITALY';
 
