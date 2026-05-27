@@ -1026,7 +1026,16 @@ function syncInventory() {
                 if (ov) ov.style.display = inventory[f] <= 0 ? 'flex' : 'none';
                 const lq = document.getElementById('lowQty'+f);
                 if (lq) lq.style.display = (inventory[f] > 0 && inventory[f] < 12) ? 'inline-block' : 'none';
+                // If the cart holds more than what's available, clear it out
+                if (cart[f] > inventory[f]) {
+                    cart[f] = 0;
+                    ['3','6'].forEach(n => {
+                        const cb = document.getElementById('qty'+f+n);
+                        if (cb) cb.checked = false;
+                    });
+                }
             });
+            renderCart(); updateStickyCart();
             checkFullSoldOut();
         })
         .catch(() => {});
