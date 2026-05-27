@@ -226,6 +226,14 @@
         .tag-sold { background:#ef4444; color:#fff; display:none; }
         .tag-low  { background:#f59e0b; color:#fff; display:none; }
 
+        /* Ship checkout step indicator */
+        .ship-dot { width:32px; height:32px; border-radius:50%; border:2px solid var(--border); background:#fff; color:var(--muted); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0; transition:all 0.25s; }
+        .ship-dot-active { background:var(--hg) !important; border-color:var(--hg) !important; color:var(--cream) !important; }
+        .ship-dot-done { background:var(--hg-dark) !important; border-color:var(--hg-dark) !important; color:var(--cream) !important; }
+        .ship-dot-label { font-size:9px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); text-align:center; }
+        .ship-progress-line { flex:1; height:2px; background:var(--border); min-width:16px; transition:background 0.25s; }
+        .ship-line-done { background:var(--hg-dark) !important; }
+
         /* Chip selector */
         .chips-label { font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(27,77,62,0.5); margin-bottom:12px; margin-top:14px; }
         .chips { display:flex; gap:8px; flex-wrap:wrap; }
@@ -748,7 +756,32 @@
 
         <div id="shipOrderArea">
 
-        <!-- ── FLAVOR CARDS ── -->
+        <!-- ── STEP PROGRESS ── -->
+        <div style="display:flex;align-items:flex-start;justify-content:center;margin-bottom:8px;gap:0;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:56px;">
+                <div id="shipDot1" class="ship-dot ship-dot-active">1</div>
+                <span class="ship-dot-label" style="color:var(--hg);font-weight:700;">Choose</span>
+            </div>
+            <div id="shipLine12" class="ship-progress-line" style="margin-top:15px;"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:56px;">
+                <div id="shipDot2" class="ship-dot">2</div>
+                <span id="shipLabel2" class="ship-dot-label">Review</span>
+            </div>
+            <div id="shipLine23" class="ship-progress-line" style="margin-top:15px;"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:56px;">
+                <div id="shipDot3" class="ship-dot">3</div>
+                <span id="shipLabel3" class="ship-dot-label">Delivery</span>
+            </div>
+            <div id="shipLine34" class="ship-progress-line" style="margin-top:15px;"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:56px;">
+                <div id="shipDot4" class="ship-dot">4</div>
+                <span id="shipLabel4" class="ship-dot-label">Payment</span>
+            </div>
+        </div>
+
+        <!-- ── STEP 1: CHOOSE ── -->
+        <div id="shipStep1">
+
         <div style="margin-bottom:20px;">
 
             <!-- Chocolate Chunk -->
@@ -796,7 +829,38 @@
             </div>
         </div>
 
-        <!-- ── ORDER FORM ── -->
+        <p id="shipStep1Helper" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:16px;">Minimum 12 cookies · select any mix of flavors</p>
+        <button id="shipContinue1" onclick="goToShipStep(2)" disabled
+            style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:not-allowed;letter-spacing:0.01em;opacity:0.4;transition:opacity 0.2s;">
+            Continue
+        </button>
+
+        </div><!-- end shipStep1 -->
+
+        <!-- ── STEP 2: REVIEW ── -->
+        <div id="shipStep2" style="display:none;">
+
+        <div class="card" style="padding:24px;margin-bottom:14px;">
+            <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Your Order</p>
+            <div id="shipCartLines" style="margin-bottom:14px;min-height:20px;"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border);margin-bottom:4px;">
+                <span style="font-size:13px;color:var(--muted);">Cookies subtotal</span>
+                <span id="shipSubtotal" style="font-size:13px;font-weight:600;color:var(--hg-dark);">$0.00</span>
+            </div>
+            <p style="font-size:11px;color:var(--muted);margin-top:10px;">Shipping calculated at next step.</p>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <button onclick="goToShipStep(1)" style="flex:1;padding:14px;background:#fff;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:var(--hg-dark);">Back</button>
+            <button onclick="goToShipStep(3)" style="flex:2;padding:14px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Continue to Checkout</button>
+        </div>
+
+        </div><!-- end shipStep2 -->
+
+        <!-- ── STEP 3: DELIVERY ── -->
+        <div id="shipStep3" style="display:none;">
+
+        <!-- Your Info -->
         <div class="card" style="padding:24px;margin-bottom:14px;">
             <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Your Info</p>
             <div style="display:flex;flex-direction:column;gap:12px;">
@@ -815,7 +879,7 @@
             </div>
         </div>
 
-        <!-- ── SHIPPING ADDRESS ── -->
+        <!-- Shipping Address -->
         <div class="card" style="padding:24px;margin-bottom:14px;">
             <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Shipping Address</p>
             <div style="display:flex;flex-direction:column;gap:12px;">
@@ -837,17 +901,25 @@
             </div>
         </div>
 
-        <!-- ── ORDER SUMMARY + PAYMENT ── -->
+        <div id="shipRatesDisplay" style="margin-bottom:14px;"></div>
+
+        <div id="shipStep3Alert" style="display:none;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;"></div>
+
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <button onclick="goToShipStep(2)" style="flex:1;padding:14px;background:#fff;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:var(--hg-dark);">Back</button>
+            <button onclick="goToShipStep(4)" style="flex:2;padding:14px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Continue to Payment</button>
+        </div>
+
+        </div><!-- end shipStep3 -->
+
+        <!-- ── STEP 4: PAYMENT ── -->
+        <div id="shipStep4" style="display:none;">
+
         <div class="card" style="padding:24px;margin-bottom:14px;">
             <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Order Summary</p>
-            <div id="shipCartLines" style="margin-bottom:14px;min-height:20px;"></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border);margin-bottom:4px;">
-                <span style="font-size:13px;color:var(--muted);">Cookies subtotal</span>
-                <span id="shipSubtotal" style="font-size:13px;font-weight:600;color:var(--hg-dark);">$0.00</span>
-            </div>
-            <div id="shipRatesDisplay" style="margin-bottom:14px;"></div>
+            <div id="shipStep4Lines" style="margin-bottom:14px;"></div>
 
-            <!-- Delivery details — populated once address + rate are selected -->
+            <!-- Delivery details -->
             <div id="shipDeliverySummary" style="display:none;background:rgba(27,77,62,0.04);border:1px solid rgba(27,77,62,0.12);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.8;color:var(--text);"></div>
 
             <div id="shipTotalRow" style="display:none;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid var(--hg-dark);margin-bottom:16px;">
@@ -891,10 +963,14 @@
 
             <button id="shipOrderBtn" onclick="placeShipOrder()"
                 style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.01em;transition:opacity 0.2s;">
-                Place Order
+                Pay Now
             </button>
             <p id="shipPayNote" style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px;letter-spacing:0.04em;">Secure · Powered by Stripe</p>
         </div>
+
+        <button onclick="goToShipStep(3)" style="width:100%;padding:14px;background:#fff;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:var(--hg-dark);margin-bottom:14px;">Back</button>
+
+        </div><!-- end shipStep4 -->
 
         </div><!-- end #shipOrderArea -->
 
@@ -1058,6 +1134,7 @@ let shipCart = { A: 0, B: 0 };
 let shipCardElement = null;
 let shipPaymentRequest = null;
 let shipDiscountApplied = false;
+let currentShipStep = 1;
 
 function shipAdj(flavor, delta) {
     const current = shipCart[flavor];
@@ -1071,7 +1148,7 @@ function shipAdj(flavor, delta) {
 }
 
 function renderShipCart() {
-    const lines = document.getElementById('shipCartLines');
+    const linesEl = document.getElementById('shipCartLines');
     const subtotalEl = document.getElementById('shipSubtotal');
     const qty = shipCart.A + shipCart.B;
     const subtotal = qty * SHIP_PRICE;
@@ -1080,15 +1157,103 @@ function renderShipCart() {
     if (shipCart.B > 0) html += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;"><span>Snickerdoodle × ${shipCart.B}</span><span>$${(shipCart.B * SHIP_PRICE).toFixed(2)}</span></div>`;
     if (qty === 0) html = `<p style="font-size:13px;color:var(--muted);">No cookies selected yet.</p>`;
     const rem = SHIP_MIN - qty;
-    if (qty > 0 && rem > 0) html += `<p style="font-size:11px;color:#f59e0b;margin-top:6px;">Add ${rem} more to reach the 12-cookie minimum.</p>`;
-    lines.innerHTML = html;
-    subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+    if (qty > 0 && rem > 0) html += `<p style="font-size:11px;color:#f59e0b;margin-top:6px;">Add ${rem} more to reach the ${SHIP_MIN}-cookie minimum.</p>`;
+    if (linesEl) { linesEl.innerHTML = html; }
+    if (subtotalEl) { subtotalEl.textContent = `$${subtotal.toFixed(2)}`; }
     updateShipTotal();
+    // Enable/disable step 1 continue button
+    const cont1 = document.getElementById('shipContinue1');
+    if (cont1) {
+        const ok = qty >= SHIP_MIN;
+        cont1.disabled = !ok;
+        cont1.style.opacity = ok ? '1' : '0.4';
+        cont1.style.cursor = ok ? 'pointer' : 'not-allowed';
+    }
     // Show Apple Pay only when cart meets minimum
     const shipApplePay = document.getElementById('shipApplePayContainer');
     if (shipApplePay && shipApplePay.dataset.available === 'true') {
         shipApplePay.style.display = qty >= SHIP_MIN ? 'block' : 'none';
     }
+}
+
+function showShipStepAlert(msg) {
+    const el = document.getElementById('shipStep3Alert');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = 'rgba(239,68,68,0.1)';
+    el.style.color = '#dc2626';
+    el.style.border = '1px solid rgba(239,68,68,0.3)';
+}
+
+function goToShipStep(n) {
+    if (n === 2) {
+        const qty = shipCart.A + shipCart.B;
+        if (qty < SHIP_MIN) return;
+    }
+    if (n === 4) {
+        const name  = (document.getElementById('shipName') || {value:''}).value.trim();
+        const email = (document.getElementById('shipEmail') || {value:''}).value.trim();
+        const emailConf = (document.getElementById('shipEmailConfirm') || {value:''}).value.trim();
+        const addr1 = (document.getElementById('shipAddr1') || {value:''}).value.trim();
+        const city  = (document.getElementById('shipCity')  || {value:''}).value.trim();
+        const state = (document.getElementById('shipState') || {value:''}).value.trim();
+        const zip   = (document.getElementById('shipZip')   || {value:''}).value.trim();
+        const a3 = document.getElementById('shipStep3Alert');
+        if (a3) a3.style.display = 'none';
+        if (!name)        { showShipStepAlert('Please enter your full name.'); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showShipStepAlert('Please enter a valid email address.'); return; }
+        if (email !== emailConf) { showShipStepAlert('Email addresses do not match.'); return; }
+        if (!addr1 || !city || !state || !zip) { showShipStepAlert('Please complete your shipping address.'); return; }
+        if (state.toUpperCase() !== 'CA') { showShipStepAlert('We currently ship within California only.'); return; }
+        if (!selectedShipRate) { showShipStepAlert('Please select a shipping option above.'); return; }
+        // Populate step 4 cart lines
+        const s4lines = document.getElementById('shipStep4Lines');
+        if (s4lines) {
+            let lh = '';
+            if (shipCart.A > 0) lh += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;"><span>Chocolate Chunk × ${shipCart.A}</span><span>$${(shipCart.A * SHIP_PRICE).toFixed(2)}</span></div>`;
+            if (shipCart.B > 0) lh += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;"><span>Snickerdoodle × ${shipCart.B}</span><span>$${(shipCart.B * SHIP_PRICE).toFixed(2)}</span></div>`;
+            s4lines.innerHTML = lh;
+        }
+        updateShipDeliverySummary();
+        updateShipTotal();
+        // Update Apple Pay amount
+        const qty = shipCart.A + shipCart.B;
+        const totalCents = qty * 500 + Math.round(parseFloat(selectedShipRate.price) * 100);
+        if (shipPaymentRequest) { try { shipPaymentRequest.update({ total: { label: "Hunter's Cookies — Shipped", amount: totalCents } }); } catch(e) {} }
+    }
+    // Show/hide steps
+    [1,2,3,4].forEach(i => {
+        const s = document.getElementById('shipStep' + i);
+        if (s) s.style.display = (i === n) ? '' : 'none';
+    });
+    // Update step dots
+    for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById('shipDot' + i);
+        if (!dot) continue;
+        dot.classList.remove('ship-dot-active', 'ship-dot-done');
+        if (i === n) dot.classList.add('ship-dot-active');
+        else if (i < n) dot.classList.add('ship-dot-done');
+    }
+    // Update connecting lines
+    [['12',1],['23',2],['34',3]].forEach(([pair, threshold]) => {
+        const line = document.getElementById('shipLine' + pair);
+        if (!line) return;
+        if (n > threshold) line.classList.add('ship-line-done');
+        else line.classList.remove('ship-line-done');
+    });
+    // Update label colors
+    const labelStep1 = document.querySelector('#shipDot1 + * + .ship-dot-label, .ship-dot-label:first-of-type');
+    [['2',2],['3',3],['4',4]].forEach(([id, step]) => {
+        const lbl = document.getElementById('shipLabel' + id);
+        if (!lbl) return;
+        lbl.style.color = (step === n) ? 'var(--hg)' : (step < n ? 'var(--hg-dark)' : 'var(--muted)');
+        lbl.style.fontWeight = (step === n) ? '700' : (step < n ? '600' : '400');
+    });
+    currentShipStep = n;
+    // Scroll to top of tab
+    const tabShip = document.getElementById('tabShip');
+    if (tabShip) { tabShip.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
 
 function tickShip() {
