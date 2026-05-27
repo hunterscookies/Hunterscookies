@@ -125,8 +125,9 @@
         /* ─── COUNTDOWN ─── */
         /* ─── TOP NAV BAR ─── */
         .tab-nav {
-            position: relative;
-            z-index: 10;
+            position: sticky;
+            top: 0;
+            z-index: 100;
             width: 100%;
             background: var(--hg-dark);
             border-bottom: 1px solid rgba(255,253,208,0.08);
@@ -682,12 +683,59 @@
     </div><!-- end #tabLocal -->
 
     <!-- ── SHIPPED COOKIES TAB ── -->
-    <div id="tabShip" class="tab-panel" style="position:relative;">
+    <div id="tabShip" class="tab-panel">
 
         <!-- ── INTRO ── -->
-        <div style="text-align:center;padding:36px 0 20px;">
-            <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);line-height:1.15;margin-bottom:8px;">Get Cookies Shipped</p>
-            <p style="font-size:13px;color:var(--muted);line-height:1.6;max-width:400px;margin:0 auto;">$5.00 per cookie + shipping. Orders open the <strong>last week of each month</strong>. Minimum 12 cookies.</p>
+        <div style="text-align:center;padding:36px 0 28px;">
+            <p style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:var(--hg-dark);line-height:1.15;margin-bottom:0;">Get Cookies Shipped</p>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:0 0 28px;">
+
+        <!-- ── HOW IT WORKS ── -->
+        <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);text-align:center;margin:0 auto 14px;letter-spacing:-0.01em;">How It Works</p>
+        <section class="card how-card">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div>
+                    <h4>Order</h4>
+                    <p>The ordering window opens the <strong>1st of each month</strong> and closes the <strong>15th</strong>.<br>First window: <strong>July 1</strong>.</p>
+                </div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div>
+                    <h4>Confirm</h4>
+                    <p>You'll get a confirmation email with your order details right away.</p>
+                </div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div>
+                    <h4>Receive</h4>
+                    <p>Cookies ship the <strong>1st of the following month</strong>. Packed fresh and shipped straight to your door.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── ORDER DETAILS BOX ── -->
+        <div style="background:var(--hg-dark);border-radius:14px;padding:18px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:14px;justify-content:center;">
+            <div style="text-align:center;padding:0 12px;">
+                <p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,253,208,0.5);margin-bottom:3px;">Price</p>
+                <p style="font-size:15px;font-weight:700;color:var(--cream);">$5.00 / cookie + shipping</p>
+            </div>
+            <div style="width:1px;background:rgba(255,253,208,0.12);flex-shrink:0;"></div>
+            <div style="text-align:center;padding:0 12px;">
+                <p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,253,208,0.5);margin-bottom:3px;">Minimum</p>
+                <p style="font-size:15px;font-weight:700;color:var(--cream);">12 cookies</p>
+            </div>
+            <div style="width:1px;background:rgba(255,253,208,0.12);flex-shrink:0;"></div>
+            <div style="text-align:center;padding:0 12px;">
+                <p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,253,208,0.5);margin-bottom:3px;">Ships To</p>
+                <p style="font-size:15px;font-weight:700;color:var(--cream);">California only <span style="font-size:11px;font-weight:400;opacity:0.6;">(for now)</span></p>
+            </div>
         </div>
 
         <!-- ── SHIP WINDOW COUNTDOWN ── -->
@@ -823,12 +871,7 @@
             <p style="font-size:12px;color:var(--muted);line-height:1.7;">Operates under California Cottage Food Law. All products prepared in a registered home kitchen per California Health &amp; Safety Code §114365.</p>
         </div>
 
-        <div style="text-align:center;padding:24px 0 40px;">
-            <a href="https://www.instagram.com/hunterscookiesdanville" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;background:var(--hg);color:var(--cream);text-decoration:none;padding:11px 22px;border-radius:99px;font-size:13px;font-weight:600;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                @hunterscookiesdanville
-            </a>
-        </div>
+        <div style="padding:24px 0 40px;"></div>
 
     </div><!-- end #tabAbout -->
 
@@ -848,7 +891,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbx-1LEhRhrStsJIDWyWKnSxyWBCR08c9W8SpxGXnSckLkHtcATQwX3ey0tXosW9sS7B/exec';
+const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbzWC0AHxRSDJ7jpQozIZ5K2F_MXsRjaRYta5w99X0LorLVfBnZyvWhluiKe_Ace7TtL/exec';
 const STRIPE_KEY  = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL       = 30;
 const MAX_ORDER   = 6;
@@ -942,13 +985,17 @@ setInterval(tick,1000); tick();
 // ── SHIPPED COOKIES ───────────────────────────
 const SHIP_PRICE   = 5.00;
 const SHIP_MIN     = 12;
-const SHIP_OPEN    = new Date('2026-05-22T00:00:00');
-const SHIP_CLOSE   = new Date('2026-05-28T23:59:59');
+const SHIP_OPEN    = new Date('2026-05-01T00:00:00');
+const SHIP_CLOSE   = new Date('2026-07-15T23:59:59');
+const SHIP_DATE    = 'August 1';
 let shipCart = { A: 0, B: 0 };
 let shipCardElement = null;
 
 function shipAdj(flavor, delta) {
-    const next = Math.max(0, shipCart[flavor] + delta);
+    const current = shipCart[flavor];
+    const next = delta > 0
+        ? current + 12
+        : Math.max(0, current - 12);
     shipCart[flavor] = next;
     document.getElementById('shipQty' + flavor).textContent = next;
     renderShipCart();
@@ -982,7 +1029,7 @@ function tickShip() {
         const diff = SHIP_OPEN - now;
         const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000),
               m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-        label.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,253,208,0.5);display:block;margin-bottom:4px;">Order Window Opens In</span>
+        label.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,253,208,0.5);display:block;margin-bottom:4px;">Shipping Orders Open July 1</span>
             <span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--cream);">${String(d).padStart(2,'0')}d &nbsp;${String(h).padStart(2,'0')}h &nbsp;${String(m).padStart(2,'0')}m &nbsp;${String(s).padStart(2,'0')}s</span>`;
         banner.style.background = 'rgba(27,77,62,0.08)';
         if (orderArea) { orderArea.style.opacity='0.4'; orderArea.style.pointerEvents='none'; }
@@ -991,13 +1038,13 @@ function tickShip() {
         const diff = SHIP_CLOSE - now;
         const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000),
               m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-        label.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fbbf24;display:block;margin-bottom:4px;">⏳ Order Window Closes In</span>
+        label.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fbbf24;display:block;margin-bottom:4px;">Orders Close July 15 &nbsp;·&nbsp; Ships ${SHIP_DATE}</span>
             <span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--cream);">${String(d).padStart(2,'0')}d &nbsp;${String(h).padStart(2,'0')}h &nbsp;${String(m).padStart(2,'0')}m &nbsp;${String(s).padStart(2,'0')}s</span>`;
         banner.style.background = 'rgba(27,77,62,0.55)';
         if (orderArea) { orderArea.style.opacity=''; orderArea.style.pointerEvents=''; }
         if (btn) { btn.disabled=false; }
     } else {
-        label.innerHTML = `<span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--cream);">🔒 This Month's Window Is Closed</span><br><span style="font-size:12px;color:rgba(255,253,208,0.5);">Orders open the last week of each month.</span>`;
+        label.innerHTML = `<span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--cream);">Orders Are Closed</span><br><span style="font-size:12px;color:rgba(255,253,208,0.5);">Next window opens July 1.</span>`;
         banner.style.background = 'rgba(27,77,62,0.08)';
         if (orderArea) { orderArea.style.opacity='0.4'; orderArea.style.pointerEvents='none'; }
         if (btn) { btn.disabled=true; }
@@ -1006,9 +1053,24 @@ function tickShip() {
 setInterval(tickShip, 1000); tickShip();
 
 let shipRateTimer = null;
+let selectedShipRate = null;
+
 function onShipAddressChange() {
     clearTimeout(shipRateTimer);
     shipRateTimer = setTimeout(fetchShippingRates, 800);
+}
+
+function selectShipRate(rate) {
+    selectedShipRate = rate;
+    document.querySelectorAll('.ship-rate-option').forEach(el => {
+        el.style.background = '';
+        el.style.borderColor = 'var(--border)';
+    });
+    const chosen = document.getElementById('rate-' + rate.token);
+    if (chosen) {
+        chosen.style.background = 'rgba(27,77,62,0.07)';
+        chosen.style.borderColor = 'var(--hg)';
+    }
 }
 
 async function fetchShippingRates() {
@@ -1019,9 +1081,15 @@ async function fetchShippingRates() {
     const qty     = shipCart.A + shipCart.B;
     const el      = document.getElementById('shipRatesDisplay');
     if (!el) return;
-    if (!city || !state || zip.length < 5) { el.innerHTML = ''; return; }
+    if (!city || !state || zip.length < 5) { el.innerHTML = ''; selectedShipRate = null; return; }
+    if (state.toUpperCase() !== 'CA') {
+        el.innerHTML = '<p style="font-size:12px;color:#dc2626;font-weight:600;">California shipping only (for now). We\'ll be expanding soon.</p>';
+        selectedShipRate = null;
+        return;
+    }
 
     el.innerHTML = '<p style="font-size:12px;color:var(--muted);">Fetching rates...</p>';
+    selectedShipRate = null;
 
     try {
         const dest = JSON.stringify({ name: 'Customer', street1, city, state, zip });
@@ -1029,20 +1097,25 @@ async function fetchShippingRates() {
         const data = await fetch(url).then(r => r.json());
 
         if (!data.success || !data.rates.length) {
-            el.innerHTML = '<p style="font-size:12px;color:var(--muted);">Could not estimate shipping. Exact cost confirmed after order.</p>';
+            el.innerHTML = '<p style="font-size:12px;color:var(--muted);">Could not estimate shipping. Rate confirmed after order.</p>';
             return;
         }
 
-        let html = '<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--hg);margin-bottom:10px;">Shipping Estimates</p>';
-        data.rates.forEach(r => {
-            const days = r.days ? ` · ${r.days} day${r.days > 1 ? 's' : ''}` : '';
-            html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;">
-                <span style="color:var(--text);">${r.carrier} ${r.service}${days}</span>
+        let html = '<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--hg);margin-bottom:10px;">Choose a Shipping Option</p>';
+        data.rates.forEach((r, i) => {
+            const days = r.days ? ` &nbsp;·&nbsp; ${r.days} day${r.days > 1 ? 's' : ''}` : '';
+            const safeToken = (r.token || i).toString().replace(/[^a-z0-9_-]/gi, '_');
+            r.token = safeToken;
+            html += `<div id="rate-${safeToken}" class="ship-rate-option" onclick="selectShipRate(${JSON.stringify(r).replace(/"/g, '&quot;')})" style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:7px;transition:background 0.15s,border-color 0.15s;">
+                <span style="color:var(--text);">${r.service}${days}</span>
                 <span style="font-weight:600;color:var(--hg-dark);">$${parseFloat(r.price).toFixed(2)}</span>
             </div>`;
         });
-        html += '<p style="font-size:10px;color:var(--muted);margin-top:8px;">Final rate confirmed at shipping. You will only be charged for cookies now.</p>';
+        html += '<p style="font-size:10px;color:var(--muted);margin-top:4px;">Shipping cost included in your total at checkout.</p>';
         el.innerHTML = html;
+
+        // Auto-select cheapest
+        if (data.rates.length) selectShipRate(data.rates[0]);
     } catch(err) {
         el.innerHTML = '<p style="font-size:12px;color:var(--muted);">Could not load rates right now.</p>';
     }
@@ -1070,6 +1143,8 @@ async function placeShipOrder() {
     if (!name)  { showShipAlert('Please enter your name.', 'error'); return; }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showShipAlert('Please enter a valid email.', 'error'); return; }
     if (!addr1 || !city || !state || !zip) { showShipAlert('Please complete your shipping address.', 'error'); return; }
+    if (state.toUpperCase() !== 'CA') { showShipAlert('We currently ship within California only.', 'error'); return; }
+    if (!selectedShipRate) { showShipAlert('Please select a shipping option above.', 'warn'); return; }
 
     const btn = document.getElementById('shipOrderBtn');
     btn.disabled = true; btn.textContent = 'Processing…';
@@ -1084,7 +1159,10 @@ async function placeShipOrder() {
                 address: `${addr1}${document.getElementById('shipAddr2').value.trim() ? ', ' + document.getElementById('shipAddr2').value.trim() : ''}, ${city}, ${state} ${zip}`,
                 qty_a: shipCart.A, qty_b: shipCart.B,
                 total_cookies: qty,
-                amount_cents: amountCents
+                amount_cents: amountCents,
+                ship_service: selectedShipRate.service,
+                ship_price: selectedShipRate.price,
+                ship_days: selectedShipRate.days || null
             })
         });
 
