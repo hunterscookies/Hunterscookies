@@ -490,7 +490,6 @@
                 </div>
                 <p class="chips-label">Choose your pack size</p>
                 <div class="chips" id="chipsA">
-                    <button class="chip active" data-qty="0" onclick="pickPack('A',0)">None</button>
                     <button class="chip" data-qty="3" onclick="pickPack('A',3)">3</button>
                     <button class="chip" data-qty="6" onclick="pickPack('A',6)">6</button>
                     
@@ -518,7 +517,6 @@
                 </div>
                 <p class="chips-label">Choose your pack size</p>
                 <div class="chips" id="chipsB">
-                    <button class="chip active" data-qty="0" onclick="pickPack('B',0)">None</button>
                     <button class="chip" data-qty="3" onclick="pickPack('B',3)">3</button>
                     <button class="chip" data-qty="6" onclick="pickPack('B',6)">6</button>
                     
@@ -743,7 +741,16 @@ function pickPack(flavor, qty) {
     if (qty > 0 && qty > inventory[flavor]) return;
     const other = flavor === 'A' ? cart.B : cart.A;
 
-    if (qty + other > MAX_ORDER && qty !== 0) {
+    // Toggle off if already selected
+    if (cart[flavor] === qty) {
+        cart[flavor] = 0;
+        document.querySelectorAll(`#chips${flavor} .chip`).forEach(c => c.classList.remove('active'));
+        renderCart();
+        updateStickyCart();
+        return;
+    }
+
+    if (qty + other > MAX_ORDER) {
         showToast(`Max 6 cookies per drop. You already have ${other} from the other flavor.`, 'warn');
         return;
     }
