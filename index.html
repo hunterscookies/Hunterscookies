@@ -925,7 +925,7 @@ async function processStripePayment(paymentMethodId) {
         payment_method_id: paymentMethodId,
         discount_code: discountApplied ? DISCOUNT_CODE : null,
         name, email, phone, pickup,
-        chocolate_chunk: cart.A, snickerdoodle: cart.B,
+        qty_a: cart.A, qty_b: cart.B,
         total_cookies: qty, amount_cents: discountApplied ? 0 : qty * 100,
         timestamp: new Date().toISOString()
     };
