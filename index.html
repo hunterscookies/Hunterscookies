@@ -185,6 +185,7 @@
         .tag-free { background:rgba(27,77,62,0.07); color:var(--hg); }
         .tag-rotation { background:var(--hg); color:var(--cream); margin-left:6px; }
         .tag-sold { background:#ef4444; color:#fff; display:none; }
+        .tag-low  { background:#f59e0b; color:#fff; display:none; }
 
         /* Chip selector */
         .chips-label { font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(27,77,62,0.5); margin-bottom:12px; margin-top:14px; }
@@ -486,6 +487,7 @@
                         <div>
                             <span class="tag tag-free">$1 / Cookie</span>
                             <span id="soldOutA" class="tag tag-sold">Sold Out</span>
+                            <span id="lowQtyA" class="tag tag-low">Low Quantity</span>
                         </div>
                     </div>
                 </div>
@@ -514,6 +516,7 @@
                         <div>
                             <span class="tag tag-free">$1 / Cookie</span>
                             <span id="soldOutB" class="tag tag-sold">Sold Out</span>
+                            <span id="lowQtyB" class="tag tag-low">Low Quantity</span>
                         </div>
                     </div>
                 </div>
@@ -703,9 +706,14 @@ function tick() {
         if (freeBtn && freeBtn.textContent==='Orders Open Tuesday at 9:00 PM') { freeBtn.textContent='Place Order'; }
     }
     if (diff <= 0 && now < ORDER_CLOSE) {
-        lbl.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:700;color:#FFFDD0;letter-spacing:-0.01em;line-height:1.1;display:block;text-align:center;">Founder\'s Drop Is Live</span>';
-        set('00','00','00','00');
-        sub.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:700;color:rgba(255,253,208,0.75);letter-spacing:-0.01em;">↓ Order Below ↓</span>';
+        const closing = ORDER_CLOSE - now;
+        const cd = Math.floor(closing/86400000);
+        const ch = Math.floor((closing%86400000)/3600000);
+        const cm = Math.floor((closing%3600000)/60000);
+        const cs = Math.floor((closing%60000)/1000);
+        lbl.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.1rem,3.5vw,1.5rem);font-weight:700;color:#fbbf24;letter-spacing:0.04em;text-transform:uppercase;display:block;text-align:center;">⏳ Order Window Closes In</span>';
+        set(p(cd),p(ch),p(cm),p(cs));
+        sub.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.3rem,4vw,1.9rem);font-weight:700;color:rgba(255,253,208,0.75);letter-spacing:-0.01em;">↓ Order Below ↓</span>';
         return;
     }
     if (now >= ORDER_CLOSE) {
@@ -995,6 +1003,8 @@ async function processStripePayment(paymentMethodId) {
         });
         const soldOutEl = document.getElementById('soldOut'+f);
         if (soldOutEl && inventory[f] <= 0) soldOutEl.style.display = 'inline-block';
+        const lowQtyEl = document.getElementById('lowQty'+f);
+        if (lowQtyEl) lowQtyEl.style.display = (inventory[f] > 0 && inventory[f] < 12) ? 'inline-block' : 'none';
     });
     renderCart(); updateStickyCart();
     if (typeof checkFullSoldOut === 'function') checkFullSoldOut();
@@ -1014,6 +1024,8 @@ function syncInventory() {
                 if (el) el.style.display = inventory[f] <= 0 ? 'inline-block' : 'none';
                 const ov = document.getElementById('soldOutOverlay'+f);
                 if (ov) ov.style.display = inventory[f] <= 0 ? 'flex' : 'none';
+                const lq = document.getElementById('lowQty'+f);
+                if (lq) lq.style.display = (inventory[f] > 0 && inventory[f] < 12) ? 'inline-block' : 'none';
             });
             checkFullSoldOut();
         })
