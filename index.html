@@ -800,7 +800,7 @@
         <div class="card" style="padding:24px;margin-bottom:14px;">
             <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Your Info</p>
             <div style="display:flex;flex-direction:column;gap:12px;">
-                <input id="shipName" type="text" placeholder="Full name" autocomplete="name"
+                <input id="shipName" type="text" placeholder="Full name" autocomplete="name" oninput="updateShipDeliverySummary()"
                     style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
                 <input id="shipEmail" type="email" placeholder="Email address" autocomplete="email"
                     style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
@@ -855,6 +855,20 @@
                 <span id="shipTotal" style="font-size:15px;font-weight:700;color:var(--hg-dark);">$0.00</span>
             </div>
 
+            <!-- Discount code -->
+            <div id="shipDiscountRow" style="margin-bottom:14px;">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input id="shipDiscountInput" type="text" placeholder="Discount code" autocomplete="off"
+                        style="flex:1;height:42px;border:1px solid var(--border);border-radius:10px;padding:0 14px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;text-transform:uppercase;letter-spacing:0.05em;"
+                        oninput="handleShipDiscountInput(this)">
+                    <button onclick="applyShipDiscount()"
+                        style="height:42px;padding:0 16px;background:var(--hg);color:var(--cream);border:none;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap;">
+                        Apply
+                    </button>
+                </div>
+                <p id="shipDiscountMsg" style="margin:6px 0 0;font-size:12px;display:none;"></p>
+            </div>
+
             <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--hg-dark);margin-bottom:12px;">Payment</p>
 
             <!-- Apple Pay (shown only if device supports it) -->
@@ -870,13 +884,16 @@
                 <p id="shipCardError" style="font-size:12px;color:#ef4444;margin-bottom:10px;display:none;"></p>
             </div>
 
+            <!-- Free order (discount applied) -->
+            <div id="shipFreeOrderContainer" style="display:none;"></div>
+
             <div id="shipInlineAlert" style="display:none;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;"></div>
 
             <button id="shipOrderBtn" onclick="placeShipOrder()"
                 style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.01em;transition:opacity 0.2s;">
                 Place Order
             </button>
-            <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px;letter-spacing:0.04em;">Secure · Powered by Stripe</p>
+            <p id="shipPayNote" style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px;letter-spacing:0.04em;">Secure · Powered by Stripe</p>
         </div>
 
         </div><!-- end #shipOrderArea -->
@@ -907,6 +924,22 @@
     </div><!-- end #tabAbout -->
 
 </div>
+
+<!-- Runs synchronously before first paint to avoid tab flash -->
+<script>
+(function(){
+  var t;
+  try { t = localStorage.getItem('activeTab'); } catch(e){}
+  t = (t && ['local','ship','about'].indexOf(t) !== -1) ? t : 'local';
+  var id = 'tab' + t.charAt(0).toUpperCase() + t.slice(1);
+  var panel = document.getElementById(id);
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    if ((b.getAttribute('onclick')||'').indexOf("'"+t+"'") !== -1) b.classList.add('active');
+  });
+  window.__initTab = t;
+})();
+</script>
 
 <footer class="site-footer">
     <p style="font-size:13px;color:#7a8a7e;margin:0 0 10px;">Follow us on Instagram</p>
@@ -1022,6 +1055,7 @@ const SHIP_DATE    = 'August 1';
 let shipCart = { A: 0, B: 0 };
 let shipCardElement = null;
 let shipPaymentRequest = null;
+let shipDiscountApplied = false;
 
 function shipAdj(flavor, delta) {
     const current = shipCart[flavor];
@@ -1048,6 +1082,11 @@ function renderShipCart() {
     lines.innerHTML = html;
     subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
     updateShipTotal();
+    // Show Apple Pay only when cart meets minimum
+    const shipApplePay = document.getElementById('shipApplePayContainer');
+    if (shipApplePay && shipApplePay.dataset.available === 'true') {
+        shipApplePay.style.display = qty >= SHIP_MIN ? 'block' : 'none';
+    }
 }
 
 function tickShip() {
@@ -1118,6 +1157,34 @@ function checkEmailMatch() {
         confirmInput.style.borderColor = '#dc2626';
     }
     icon.style.display = 'block';
+}
+
+// ── SHIPPED DISCOUNT CODE ────────────────────────────────
+function handleShipDiscountInput(el) {
+    el.value = el.value.toUpperCase();
+    if (!shipDiscountApplied) document.getElementById('shipDiscountMsg').style.display = 'none';
+}
+
+function applyShipDiscount() {
+    const code = (document.getElementById('shipDiscountInput') || {value:''}).value.trim().toUpperCase();
+    const msg  = document.getElementById('shipDiscountMsg');
+    const cardContainer   = document.getElementById('shipCardContainer');
+    const appleContainer  = document.getElementById('shipApplePayContainer');
+    const payNote         = document.getElementById('shipPayNote');
+    if (code === DISCOUNT_CODE) {
+        shipDiscountApplied = true;
+        msg.textContent = 'Discount applied. No payment required.';
+        msg.style.cssText = 'margin:6px 0 0;font-size:12px;display:block;color:#1B4D3E;font-weight:600;';
+        if (cardContainer)  cardContainer.style.display  = 'none';
+        if (appleContainer) appleContainer.style.display = 'none';
+        if (payNote) payNote.style.display = 'none';
+    } else {
+        shipDiscountApplied = false;
+        msg.textContent = 'Invalid code.';
+        msg.style.cssText = 'margin:6px 0 0;font-size:12px;display:block;color:#c0392b;';
+        if (cardContainer)  cardContainer.style.display  = 'block';
+        if (payNote) payNote.style.display = 'block';
+    }
 }
 
 // ── ADDRESS AUTOCOMPLETE (Nominatim) ─────────────────────
@@ -1201,9 +1268,20 @@ function updateShipTotal() {
     updateShipPayRequest();
 }
 
+function addShipBusinessDays(startDate, days) {
+    const d = new Date(startDate);
+    let remaining = Math.max(0, parseInt(days) || 0);
+    while (remaining > 0) {
+        d.setDate(d.getDate() + 1);
+        if (d.getDay() !== 0) remaining--; // skip Sundays — USPS doesn't deliver Sundays
+    }
+    return d;
+}
+
 function updateShipDeliverySummary() {
     const summaryEl = document.getElementById('shipDeliverySummary');
     if (!summaryEl) return;
+    const name  = (document.getElementById('shipName')  || {value:''}).value.trim();
     const addr1 = (document.getElementById('shipAddr1') || {value:''}).value.trim();
     const addr2 = (document.getElementById('shipAddr2') || {value:''}).value.trim();
     const city  = (document.getElementById('shipCity')  || {value:''}).value.trim();
@@ -1211,17 +1289,19 @@ function updateShipDeliverySummary() {
     const zip   = (document.getElementById('shipZip')   || {value:''}).value.trim();
     if (!addr1 || !city || !selectedShipRate) { summaryEl.style.display = 'none'; return; }
     const addrLine = [addr1, addr2].filter(Boolean).join(', ') + ', ' + city + ', ' + state.toUpperCase() + ' ' + zip;
+    const days = parseInt(selectedShipRate.days) || 0;
     let etaHtml = '';
-    if (selectedShipRate.days) {
-        const base = new Date('2026-08-01');
-        base.setDate(base.getDate() + parseInt(selectedShipRate.days));
+    if (days > 0) {
+        const arrival = addShipBusinessDays(new Date(2026, 7, 1), days);
         const opts = { month: 'short', day: 'numeric' };
-        etaHtml = `<span style="color:var(--muted);">Ships Aug 1 · Est. arrival ${base.toLocaleDateString('en-US', opts)}</span>`;
+        etaHtml = `<span style="color:var(--muted);">Ships Aug 1 · Est. arrival ${arrival.toLocaleDateString('en-US', opts)}</span>`;
     } else {
         etaHtml = `<span style="color:var(--muted);">Ships ${SHIP_DATE}</span>`;
     }
     const carrier = selectedShipRate.carrier ? selectedShipRate.carrier + ' ' : '';
+    const nameRow = name ? `<div style="margin-bottom:5px;"><span style="font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--hg);">Recipient</span><br>${name}</div>` : '';
     summaryEl.innerHTML =
+        nameRow +
         `<div style="margin-bottom:5px;"><span style="font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--hg);">Delivering to</span><br>${addrLine}</div>` +
         `<div style="margin-bottom:5px;"><span style="font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--hg);">Shipping</span><br>${carrier}${selectedShipRate.service} — $${parseFloat(selectedShipRate.price).toFixed(2)}</div>` +
         `<div>${etaHtml}</div>`;
@@ -1324,21 +1404,27 @@ async function placeShipOrder() {
     if (!addr1 || !city || !state || !zip) { showShipAlert('Please complete your shipping address.', 'error'); return; }
     if (state.toUpperCase() !== 'CA') { showShipAlert('We currently ship within California only.', 'error'); return; }
     if (!selectedShipRate) { showShipAlert('Please select a shipping option above.', 'warn'); return; }
-    if (!stripe || !shipCardElement) { showShipAlert('Payment not initialized. Please refresh the page and try again.', 'error'); return; }
 
     const btn = document.getElementById('shipOrderBtn');
     if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
 
+    // Discount bypass — no payment needed
+    if (shipDiscountApplied) {
+        await submitShipOrder(null, null, true);
+        return;
+    }
+
+    if (!stripe || !shipCardElement) { showShipAlert('Payment not initialized. Please refresh the page and try again.', 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; } return; }
     const { token, error } = await stripe.createToken(shipCardElement, { name });
     if (error) {
         showShipAlert(error.message, 'error');
         if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
         return;
     }
-    await submitShipOrder(null, token.id);
+    await submitShipOrder(null, token.id, false);
 }
 
-async function submitShipOrder(paymentMethodId, tokenId) {
+async function submitShipOrder(paymentMethodId, tokenId, isFree = false) {
     const qty   = shipCart.A + shipCart.B;
     const name  = (document.getElementById('shipName')  || {value:''}).value.trim();
     const email = (document.getElementById('shipEmail') || {value:''}).value.trim();
@@ -1357,12 +1443,13 @@ async function submitShipOrder(paymentMethodId, tokenId) {
             body: JSON.stringify({
                 type: 'shipped',
                 name, email, phone,
-                token: tokenId,
-                payment_method_id: paymentMethodId,
+                token: isFree ? null : tokenId,
+                payment_method_id: isFree ? null : paymentMethodId,
+                discount_code: isFree ? DISCOUNT_CODE : null,
                 address: `${addr1}${addr2 ? ', ' + addr2 : ''}, ${city}, ${state} ${zip}`,
                 qty_a: shipCart.A, qty_b: shipCart.B,
                 total_cookies: qty,
-                amount_cents: cookiesCents + shipCents,
+                amount_cents: isFree ? 0 : (cookiesCents + shipCents),
                 ship_service: selectedShipRate ? selectedShipRate.service : null,
                 ship_price:   selectedShipRate ? selectedShipRate.price   : null,
                 ship_days:    selectedShipRate ? selectedShipRate.days    : null
@@ -1399,8 +1486,9 @@ function switchTab(tab) {
     });
     try { localStorage.setItem('activeTab', tab); } catch(e) {}
 }
-// Restore tab on load — always call switchTab so there's no flash
+// Restore tab — inline script above handles initial paint; this syncs button/panel state fully
 (function() {
+    if (window.__initTab) { switchTab(window.__initTab); return; }
     try {
         const saved = localStorage.getItem('activeTab');
         switchTab((saved && ['local','ship','about'].includes(saved)) ? saved : 'local');
@@ -1553,7 +1641,7 @@ async function initStripe() {
             });
             shipPrBtn.mount('#ship-payment-request-button');
             const shipApplePay = document.getElementById('shipApplePayContainer');
-            if (shipApplePay) shipApplePay.style.display = 'block';
+            if (shipApplePay) shipApplePay.dataset.available = 'true'; // shown when cart has items
         }
         shipPaymentRequest.on('paymentmethod', async (ev) => {
             const qty = shipCart.A + shipCart.B;
@@ -1567,7 +1655,7 @@ async function initStripe() {
                 showShipAlert('Please complete all fields before using Apple Pay.', 'error');
                 ev.complete('fail'); return;
             }
-            const success = await submitShipOrder(ev.paymentMethod.id, null);
+            const success = await submitShipOrder(ev.paymentMethod.id, null, false);
             ev.complete(success ? 'success' : 'fail');
         });
     } catch (e) { console.error('Stripe init error:', e); }
