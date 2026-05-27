@@ -38,9 +38,11 @@
         .wrap { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 0 20px; }
 
         /* ─── STICKY PROGRESS HEADER ─── */
-        #stickyHeader {
+        #stickyTopBar {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(249,248,240,0.92);
+        }
+        #stickyHeader {
+            background: rgba(249,248,240,0.95);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
@@ -125,9 +127,6 @@
         /* ─── COUNTDOWN ─── */
         /* ─── TOP NAV BAR ─── */
         .tab-nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
             width: 100%;
             background: var(--hg-dark);
             border-bottom: 1px solid rgba(255,253,208,0.08);
@@ -418,19 +417,21 @@
 </div>
 
 <!-- ── TOP NAV BAR ── -->
-<div class="tab-nav">
-    <div class="tab-nav-inner">
-        <button class="tab-btn active" onclick="switchTab('local')">Local Drops</button>
-        <button class="tab-btn" onclick="switchTab('ship')">Shipped Orders</button>
-        <button class="tab-btn" onclick="switchTab('about')">About</button>
+<div id="stickyTopBar">
+    <!-- Mini brand header (appears on scroll) -->
+    <div id="stickyHeader">
+        <span class="sticky-brand">Hunter's Cookies</span>
+        <div class="sticky-cart-pill" onclick="document.getElementById('orderArea').scrollIntoView({behavior:'smooth',block:'start'});">
+            <span>Order Now</span>
+        </div>
     </div>
-</div>
-
-<!-- Sticky mini header (appears on scroll) -->
-<div id="stickyHeader">
-    <span class="sticky-brand">Hunter's Cookies</span>
-    <div class="sticky-cart-pill" onclick="document.getElementById('orderArea').scrollIntoView({behavior:'smooth',block:'start'});">
-        <span>Order Now</span>
+    <!-- Tab nav (always visible) -->
+    <div class="tab-nav">
+        <div class="tab-nav-inner">
+            <button class="tab-btn active" onclick="switchTab('local')">Local Drops</button>
+            <button class="tab-btn" onclick="switchTab('ship')">Shipped Orders</button>
+            <button class="tab-btn" onclick="switchTab('about')">About</button>
+        </div>
     </div>
 </div>
 
@@ -801,8 +802,14 @@
                     style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
                 <input id="shipEmail" type="email" placeholder="Email address" autocomplete="email"
                     style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
-                <input id="shipPhone" type="tel" placeholder="Phone number" autocomplete="tel"
-                    style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
+                <div style="position:relative;">
+                    <input id="shipEmailConfirm" type="email" placeholder="Confirm email address" autocomplete="off"
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;box-sizing:border-box;" oninput="checkEmailMatch()">
+                    <span id="emailMatchIcon" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;display:none;"></span>
+                </div>
+                <input id="shipPhone" type="tel" placeholder="(XXX) XXX-XXXX" autocomplete="tel"
+                    style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;"
+                    oninput="formatShipPhone(this)" maxlength="14">
             </div>
         </div>
 
@@ -810,17 +817,20 @@
         <div class="card" style="padding:24px;margin-bottom:14px;">
             <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Shipping Address</p>
             <div style="display:flex;flex-direction:column;gap:12px;">
-                <input id="shipAddr1" type="text" placeholder="Street address" autocomplete="address-line1" oninput="onShipAddressChange()"
-                    style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
+                <div style="position:relative;">
+                    <input id="shipAddr1" type="text" placeholder="Street address" autocomplete="off" oninput="onShipAddr1Input()"
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;box-sizing:border-box;">
+                    <div id="addrSuggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;z-index:200;max-height:220px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.08);"></div>
+                </div>
                 <input id="shipAddr2" type="text" placeholder="Apt, suite, unit (optional)" autocomplete="address-line2"
                     style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
+                <input id="shipCity" type="text" placeholder="City" autocomplete="address-level2" oninput="onShipAddressChange()"
+                    style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
                 <div style="display:flex;gap:10px;">
-                    <input id="shipCity" type="text" placeholder="City" autocomplete="address-level2" oninput="onShipAddressChange()"
-                        style="flex:2;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
                     <input id="shipState" type="text" placeholder="State" autocomplete="address-level1" maxlength="2" oninput="onShipAddressChange()"
                         style="flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
                     <input id="shipZip" type="text" placeholder="ZIP" autocomplete="postal-code" maxlength="10" oninput="onShipAddressChange()"
-                        style="flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
+                        style="flex:2;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
                 </div>
             </div>
         </div>
@@ -1060,6 +1070,83 @@ function onShipAddressChange() {
     shipRateTimer = setTimeout(fetchShippingRates, 800);
 }
 
+// ── PHONE FORMATTER ───────────────────────────────────────
+function formatShipPhone(input) {
+    let digits = input.value.replace(/\D/g, '').substring(0, 10);
+    let fmt = '';
+    if (digits.length > 0) fmt = '(' + digits.substring(0, 3);
+    if (digits.length >= 4) fmt += ') ' + digits.substring(3, 6);
+    if (digits.length >= 7) fmt += '-' + digits.substring(6, 10);
+    input.value = fmt;
+}
+
+// ── EMAIL MATCH CHECK ─────────────────────────────────────
+function checkEmailMatch() {
+    const a = document.getElementById('shipEmail').value.trim();
+    const b = document.getElementById('shipEmailConfirm').value.trim();
+    const icon = document.getElementById('emailMatchIcon');
+    const confirmInput = document.getElementById('shipEmailConfirm');
+    if (!b) { icon.style.display = 'none'; confirmInput.style.borderColor = 'var(--border)'; return; }
+    if (a === b) {
+        icon.textContent = '✓'; icon.style.color = '#16a34a';
+        confirmInput.style.borderColor = '#16a34a';
+    } else {
+        icon.textContent = '✗'; icon.style.color = '#dc2626';
+        confirmInput.style.borderColor = '#dc2626';
+    }
+    icon.style.display = 'block';
+}
+
+// ── ADDRESS AUTOCOMPLETE (Nominatim) ─────────────────────
+let addrTimer = null;
+function onShipAddr1Input() {
+    onShipAddressChange();
+    clearTimeout(addrTimer);
+    const val = document.getElementById('shipAddr1').value.trim();
+    const box = document.getElementById('addrSuggestions');
+    if (val.length < 4) { box.style.display = 'none'; return; }
+    addrTimer = setTimeout(() => fetchAddrSuggestions(val), 500);
+}
+
+async function fetchAddrSuggestions(query) {
+    const box = document.getElementById('addrSuggestions');
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=us&q=${encodeURIComponent(query)}`;
+        const results = await fetch(url, { headers: { 'Accept-Language': 'en' } }).then(r => r.json());
+        const caResults = results.filter(r => r.address && r.address.state === 'California');
+        if (!caResults.length) { box.style.display = 'none'; return; }
+        box.innerHTML = caResults.map(r => {
+            const addr = r.address;
+            const street = [addr.house_number, addr.road].filter(Boolean).join(' ');
+            const city   = addr.city || addr.town || addr.village || addr.hamlet || '';
+            const zip    = addr.postcode || '';
+            if (!street || !city) return '';
+            return `<div class="addr-suggestion" onclick="fillAddress('${street.replace(/'/g,"\\'")}','${city.replace(/'/g,"\\'")}','CA','${zip}')"
+                style="padding:10px 14px;font-size:13px;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border);line-height:1.4;">
+                <strong>${street}</strong><br><span style="color:var(--muted);font-size:12px;">${city}, CA ${zip}</span>
+            </div>`;
+        }).filter(Boolean).join('');
+        if (box.innerHTML) box.style.display = 'block'; else box.style.display = 'none';
+    } catch(e) { box.style.display = 'none'; }
+}
+
+function fillAddress(street, city, state, zip) {
+    document.getElementById('shipAddr1').value  = street;
+    document.getElementById('shipCity').value   = city;
+    document.getElementById('shipState').value  = state;
+    document.getElementById('shipZip').value    = zip;
+    document.getElementById('addrSuggestions').style.display = 'none';
+    onShipAddressChange();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e => {
+    if (!e.target.closest('#shipAddr1') && !e.target.closest('#addrSuggestions')) {
+        const box = document.getElementById('addrSuggestions');
+        if (box) box.style.display = 'none';
+    }
+});
+
 function selectShipRate(rate) {
     selectedShipRate = rate;
     document.querySelectorAll('.ship-rate-option').forEach(el => {
@@ -1101,8 +1188,22 @@ async function fetchShippingRates() {
             return;
         }
 
+        // Only show USPS Priority Mail and UPS Ground
+        const allowed = [
+            { carrier: 'USPS', service: 'Priority Mail' },
+            { carrier: 'UPS',  service: 'Ground' }
+        ];
+        const rates = data.rates.filter(r =>
+            allowed.some(a => r.carrier.toUpperCase() === a.carrier && r.service === a.service)
+        );
+
+        if (!rates.length) {
+            el.innerHTML = '<p style="font-size:12px;color:var(--muted);">Could not load rates right now. Try again shortly.</p>';
+            return;
+        }
+
         let html = '<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--hg);margin-bottom:10px;">Choose a Shipping Option</p>';
-        data.rates.forEach((r, i) => {
+        rates.forEach((r, i) => {
             const days = r.days ? ` &nbsp;·&nbsp; ${r.days} day${r.days > 1 ? 's' : ''}` : '';
             const safeToken = (r.token || i).toString().replace(/[^a-z0-9_-]/gi, '_');
             r.token = safeToken;
@@ -1115,7 +1216,7 @@ async function fetchShippingRates() {
         el.innerHTML = html;
 
         // Auto-select cheapest
-        if (data.rates.length) selectShipRate(data.rates[0]);
+        if (rates.length) selectShipRate(rates[0]);
     } catch(err) {
         el.innerHTML = '<p style="font-size:12px;color:var(--muted);">Could not load rates right now.</p>';
     }
@@ -1140,8 +1241,10 @@ async function placeShipOrder() {
     const city  = document.getElementById('shipCity').value.trim();
     const state = document.getElementById('shipState').value.trim();
     const zip   = document.getElementById('shipZip').value.trim();
+    const emailConfirm = document.getElementById('shipEmailConfirm').value.trim();
     if (!name)  { showShipAlert('Please enter your name.', 'error'); return; }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showShipAlert('Please enter a valid email.', 'error'); return; }
+    if (email !== emailConfirm) { showShipAlert('Email addresses do not match. Please check and try again.', 'error'); return; }
     if (!addr1 || !city || !state || !zip) { showShipAlert('Please complete your shipping address.', 'error'); return; }
     if (state.toUpperCase() !== 'CA') { showShipAlert('We currently ship within California only.', 'error'); return; }
     if (!selectedShipRate) { showShipAlert('Please select a shipping option above.', 'warn'); return; }
