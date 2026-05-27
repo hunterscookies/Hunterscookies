@@ -336,8 +336,8 @@
     </div>
     <p style="font-size:12px;color:rgba(255,253,208,0.5);line-height:1.6;margin-bottom:10px">Tuesday, May 26 at 8:00 PM</p>
     <!-- THIS DROP CARD -->
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:#FFFDD0;text-align:center;max-width:340px;width:100%;margin:12px 0 8px;letter-spacing:-0.01em;">Founder's Drop</p>
     <div style="max-width:340px;width:100%;background:rgba(255,220,100,0.07);border:1.5px solid rgba(255,220,100,0.2);border-radius:16px;padding:14px 18px;text-align:left;margin-bottom:10px">
-        <p style="font-size:9px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:#fbbf24;margin-bottom:14px">This Drop — Founder's Drop</p>
 
         <p style="font-size:12px;font-weight:700;color:rgba(255,253,208,0.85);margin-bottom:6px">$1 Per Cookie · Limited Release</p>
         <p style="font-size:12px;color:rgba(255,253,208,0.45);line-height:1.6;margin-bottom:6px">A special introductory drop — limited to <strong style="color:rgba(255,253,208,0.65)">6 cookies per customer</strong>. As a thank you for being here first.</p>
@@ -350,13 +350,13 @@
         </p>
         <p style="font-size:12px;font-weight:700;color:rgba(255,253,208,0.85);margin-bottom:6px">📍 Pickup</p>
         <p style="font-size:12px;color:rgba(255,253,208,0.45);line-height:1.6">
-            <strong style="color:rgba(255,253,208,0.65)">Sunday, May 31 · 12 PM – 4 PM</strong><br>
+            <strong style="color:rgba(255,253,208,0.65)">Sunday, June 1 · 12–2 PM or 4–6 PM</strong><br>
             Danville, CA · Location in your confirmation.
         </p>
     </div>
 
     <!-- FUTURE DROPS CARD -->
-    <p style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:rgba(255,253,208,0.95);max-width:340px;width:100%;text-align:left;margin-bottom:6px">Future Drops</p>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:#FFFDD0;text-align:center;max-width:340px;width:100%;margin:12px 0 8px;letter-spacing:-0.01em;">Future Drops</p>
     <div style="max-width:340px;width:100%;background:rgba(255,253,208,0.04);border:1px solid rgba(255,253,208,0.1);border-radius:16px;padding:14px 18px;text-align:left">
         <p style="font-size:12px;font-weight:800;letter-spacing:0.1em;color:#fbbf24;margin-bottom:14px">$4.50 / COOKIE</p>
 
@@ -366,11 +366,14 @@
         <p style="font-size:12px;color:rgba(255,253,208,0.45);line-height:1.8;margin-bottom:6px">
             <strong style="color:rgba(255,253,208,0.6)">During drop weeks:</strong><br>
             📅 Ordering window: <strong style="color:rgba(255,253,208,0.65)">Tuesday 8 PM – Thursday 8 PM</strong> or until sold out.<br>
-            📍 Pickup window: <strong style="color:rgba(255,253,208,0.65)">Saturday · 2 PM–4 PM</strong>
+            📍 Pickup window: <strong style="color:rgba(255,253,208,0.65)">Sunday · 12–2 PM or 4–6 PM</strong>
         </p>
 
         <p style="font-size:11px;color:rgba(255,253,208,0.3);line-height:1.5">📦 Pickup only · Danville, CA · Location in confirmation.</p>
     </div>
+
+    <!-- Preview button -->
+    <button onclick="document.getElementById('lockOverlay').style.display='none';" style="margin-top:24px;padding:12px 28px;background:transparent;border:1px solid rgba(255,253,208,0.2);border-radius:99px;color:rgba(255,253,208,0.45);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;cursor:pointer;">Preview Ordering Site</button>
 </div>
 
 <!-- Sticky mini header (appears on scroll) -->
@@ -429,8 +432,8 @@
         <div class="step">
             <div class="step-num">3</div>
             <div>
-                <h4>Pick Up — Saturday</h4>
-                <p>During drop weeks, pickup is available <strong>Saturday</strong>. One window: <strong>2 PM–4 PM</strong>. Location announced on confirmation. Unclaimed by Saturday 4 PM are forfeited.</p>
+                <h4>Pick Up — Sunday</h4>
+                <p>During drop weeks, pickup is available <strong>Sunday</strong>. Two windows: <strong>12–2 PM</strong> or <strong>4–6 PM</strong>. Location announced on confirmation. Unclaimed by Sunday 6 PM are forfeited.</p>
             </div>
         </div>
     </section>
@@ -556,7 +559,8 @@
                     <div class="fg">
                         <label>Pickup Window</label>
                         <select id="pickupWindow">
-                            <option>Saturday, May 31 — 2 PM to 4 PM</option>
+                            <option>Sunday, June 1 — 12 PM to 2 PM</option>
+                            <option>Sunday, June 1 — 4 PM to 6 PM</option>
                         </select>
                     </div>
                 </div>
@@ -663,6 +667,19 @@ function tick() {
     const lbl = document.getElementById('cdTopLabel');
     const sub = document.getElementById('cdSub');
 
+    const orderArea = document.getElementById('orderArea');
+    const cardBtn   = document.getElementById('cardPayBtn');
+    const freeBtn   = document.getElementById('freeOrderBtn');
+    if (diff > 0) {
+        // Drop not yet open — lock the ordering area
+        if (orderArea) { orderArea.style.opacity='0.45'; orderArea.style.pointerEvents='none'; }
+        if (cardBtn)   { cardBtn.disabled=true; cardBtn.textContent='Orders Open Tuesday at 8:00 PM'; cardBtn.style.opacity='0.6'; }
+        if (freeBtn)   { freeBtn.disabled=true; freeBtn.textContent='Orders Open Tuesday at 8:00 PM'; }
+    } else if (orderArea) {
+        orderArea.style.opacity=''; orderArea.style.pointerEvents='';
+        if (cardBtn && cardBtn.textContent==='Orders Open Tuesday at 8:00 PM') { cardBtn.textContent='Confirm Order'; cardBtn.style.opacity=''; }
+        if (freeBtn && freeBtn.textContent==='Orders Open Tuesday at 8:00 PM') { freeBtn.textContent='Place Order'; }
+    }
     if (diff <= 0 && now < ORDER_CLOSE) {
         lbl.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:700;color:#FFFDD0;letter-spacing:-0.01em;line-height:1.1;display:block;text-align:center;">Founder\'s Drop Is Live</span>';
         set('00','00','00','00');
