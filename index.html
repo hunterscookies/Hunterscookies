@@ -83,7 +83,7 @@
             margin-bottom: 20px;
             transition: transform 0.3s;
             position: relative;
-            box-shadow: 0 8px 40px rgba(15,43,34,0.2);
+
         }
         .logo-ring:hover { transform: scale(1.03); }
         .logo-ring img {
@@ -135,7 +135,7 @@
             width:220px; height:220px; border-radius:50%;
             background:rgba(255,253,208,0.05); pointer-events:none;
         }
-        .cd-top { font-size:9px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:rgba(255,253,208,0.38); margin-bottom:18px; position:relative; z-index:1; }
+        .cd-top { font-family:'Cormorant Garamond',serif; font-size:clamp(1.4rem,4vw,2rem); font-weight:700; letter-spacing:-0.01em; text-transform:none; color:#FFFDD0; text-align:center; margin-bottom:18px; position:relative; z-index:1; }
         .cd-row { display:flex; align-items:flex-start; justify-content:center; gap:6px; position:relative; z-index:1; }
         .cd-cell { text-align:center; }
         .cd-num {
@@ -615,7 +615,14 @@
 
 </div>
 
-<footer class="site-footer">© 2026 Hunter's Cookies · Danville, CA</footer>
+<footer class="site-footer">
+    <a href="https://instagram.com/hunterscookiesdanville" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#1B4D3E'" onmouseout="this.style.color=''">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+        </svg>
+    </a>
+    <br>© 2026 Hunter's Cookies · Danville, CA
+</footer>
 
 <!-- Toast -->
 <div id="toast"></div>
