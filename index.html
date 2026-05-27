@@ -366,7 +366,7 @@
         <p style="font-size:12px;color:rgba(255,253,208,0.45);line-height:1.8;margin-bottom:6px">
             <strong style="color:rgba(255,253,208,0.6)">During drop weeks:</strong><br>
             📅 Ordering window: <strong style="color:rgba(255,253,208,0.65)">Tuesday 8 AM – Wednesday 8 PM</strong> or until sold out.<br>
-            📍 Pickup window: <strong style="color:rgba(255,253,208,0.65)">Saturday & Sunday · 10 AM–12 PM or 2 PM–4 PM</strong>
+            📍 Pickup window: <strong style="color:rgba(255,253,208,0.65)">Saturday · 2 PM–6 PM</strong>
         </p>
 
         <p style="font-size:11px;color:rgba(255,253,208,0.3);line-height:1.5">📦 Pickup only · Danville, CA · Location in confirmation.</p>
@@ -429,8 +429,8 @@
         <div class="step">
             <div class="step-num">3</div>
             <div>
-                <h4>Pick Up — Saturday & Sunday</h4>
-                <p>During drop weeks, pickup is available <strong>Saturday & Sunday</strong>. Two windows each day: <strong>10 AM–12 PM</strong> or <strong>2 PM–4 PM</strong>. Location announced on confirmation. Unclaimed by Sunday 4 PM are forfeited.</p>
+                <h4>Pick Up — Saturday</h4>
+                <p>During drop weeks, pickup is available <strong>Saturday</strong>. One window: <strong>2 PM–6 PM</strong>. Location announced on confirmation. Unclaimed by Saturday 6 PM are forfeited.</p>
             </div>
         </div>
     </section>
@@ -461,7 +461,8 @@
 
         <!-- Menu -->
         <div style="position:relative;">
-            <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);text-align:center;margin:0 0 14px;letter-spacing:-0.01em;">This Week's Menu</p>
+            <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);text-align:center;margin:0 0 6px;letter-spacing:-0.01em;">This Week's Menu</p>
+            <p style="text-align:center;font-size:12px;color:var(--muted);margin:0 0 14px;">Mix and match both flavors in one order.</p>
 
             <!-- Chocolate Chunk -->
             <div class="card card-hover cookie-card" style="margin-bottom:14px">
@@ -475,7 +476,6 @@
                         <div>
                             <span class="tag tag-free">$1 / Cookie</span>
                             <span id="soldOutA" class="tag tag-sold">Sold Out</span>
-                            <span id="stockA" style="font-size:11px;color:var(--muted);margin-left:4px;"></span>
                         </div>
                     </div>
                 </div>
@@ -501,7 +501,6 @@
                         <div>
                             <span class="tag tag-free">$1 / Cookie</span>
                             <span id="soldOutB" class="tag tag-sold">Sold Out</span>
-                            <span id="stockB" style="font-size:11px;color:var(--muted);margin-left:4px;"></span>
                         </div>
                     </div>
                 </div>
@@ -530,8 +529,8 @@
 
         <!-- Sidebar -->
         <div id="orderSidebar">
+            <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);text-align:center;margin:0 0 14px;letter-spacing:-0.01em;">Reserve Your Cookies</p>
             <div class="card sidebar-inner">
-                <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);text-align:center;margin:0 0 14px;letter-spacing:-0.01em;">Reserve Your Cookies</p>
 
                 <!-- Cart lines -->
                 <div id="cartLines">
@@ -561,8 +560,7 @@
                     <div class="fg">
                         <label>Pickup Window</label>
                         <select id="pickupWindow">
-                            <option>Saturday, May 30 — 12 PM to 2 PM</option>
-                            <option>Saturday, May 30 — 5 PM to 7 PM</option>
+                            <option>Saturday, May 31 — 2 PM to 6 PM</option>
                         </select>
                     </div>
                 </div>
@@ -707,16 +705,6 @@ function scrollToOrder() {
 }
 
 // ── PACK PICKER ───────────────────────────────
-function updateStockLabels() {
-    for (const f of ['A','B']) {
-        const el = document.getElementById('stock'+f);
-        if (!el) continue;
-        const rem = inventory[f];
-        if (rem <= 0) { el.textContent = ''; return; }
-        el.textContent = rem + ' left';
-    }
-}
-
 function pickPack(flavor, qty) {
     if (qty > 0 && qty > inventory[flavor]) return;
     const other = flavor === 'A' ? cart.B : cart.A;
@@ -951,7 +939,6 @@ async function processStripePayment(paymentMethodId) {
     }
     // Success
     inventory.A -= cart.A; inventory.B -= cart.B;
-    updateStockLabels();
     usedEmails.add(email); hideInlineAlert();
     const parts = [];
     if (cart.A > 0) parts.push(`${cart.A}x Chocolate Chunk`);
@@ -983,7 +970,6 @@ fetch(SHEET_URL)
     .then(data => {
         inventory.A = data.remaining_a ?? TOTAL;
         inventory.B = data.remaining_b ?? TOTAL;
-        updateStockLabels();
         if (data.used_emails) data.used_emails.forEach(e => usedEmails.add(e));
         ['A','B'].forEach(f => {
             if (inventory[f] <= 0) document.getElementById('soldOut'+f).style.display = 'inline-block';
