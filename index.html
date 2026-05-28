@@ -410,6 +410,86 @@
         #cardPayBtn { width:100%; height:54px; background:var(--hg); color:var(--cream); border:none; border-radius:14px; font-size:16px; font-weight:600; cursor:pointer; transition:opacity 0.2s; letter-spacing:0.01em; }
         #cardPayBtn:disabled { opacity:0.45; cursor:not-allowed; }
 
+        /* ─── ORDER CONFIRMED MODAL ─── */
+        #orderConfirmedModal {
+            display:none;
+            position:fixed;
+            inset:0;
+            z-index:9999;
+            background:rgba(0,0,0,0.55);
+            backdrop-filter:blur(4px);
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+        }
+        #orderConfirmedModal.show { display:flex; }
+        #orderConfirmedModal .ocm-card {
+            background:#fff;
+            border-radius:24px;
+            padding:36px 28px 28px;
+            max-width:400px;
+            width:100%;
+            text-align:center;
+            box-shadow:0 24px 64px rgba(0,0,0,0.22);
+            animation:ocmPop 0.28s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes ocmPop {
+            from { opacity:0; transform:scale(0.88); }
+            to   { opacity:1; transform:scale(1); }
+        }
+        .ocm-check {
+            width:68px; height:68px;
+            background:#1B4D3E;
+            border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            margin:0 auto 18px;
+            font-size:2rem;
+        }
+        .ocm-headline {
+            font-family:'Cormorant Garamond',serif;
+            font-size:2rem; font-weight:700;
+            color:#1B4D3E;
+            margin:0 0 4px;
+            line-height:1.1;
+        }
+        .ocm-sub {
+            font-size:12px; font-weight:700;
+            letter-spacing:0.14em; text-transform:uppercase;
+            color:#6b7280; margin:0 0 20px;
+        }
+        .ocm-order-num {
+            background:#f0fdf4; border:1px solid #bbf7d0;
+            border-radius:12px; padding:12px 18px; margin-bottom:18px;
+        }
+        .ocm-order-num p { margin:0; }
+        .ocm-order-label {
+            font-size:10px; font-weight:700; letter-spacing:0.12em;
+            text-transform:uppercase; color:#6b7280; margin-bottom:2px !important;
+        }
+        .ocm-order-val {
+            font-family:'Cormorant Garamond',serif;
+            font-size:1.5rem; font-weight:700; color:#1B4D3E;
+            letter-spacing:0.05em;
+        }
+        .ocm-items {
+            background:#fafaf9; border:1px solid #e5e7eb;
+            border-radius:12px; padding:13px 16px;
+            font-size:13px; color:#374151; line-height:1.7;
+            margin-bottom:16px; text-align:left;
+        }
+        .ocm-note {
+            font-size:12px; color:#6b7280; line-height:1.6; margin:0 0 22px;
+        }
+        .ocm-close {
+            width:100%; padding:14px;
+            background:#1B4D3E; color:#FFFDD0;
+            border:none; border-radius:14px;
+            font-size:15px; font-weight:600;
+            cursor:pointer; letter-spacing:0.01em;
+            transition:opacity 0.15s;
+        }
+        .ocm-close:hover { opacity:0.85; }
+
         /* ─── FOOTER ─── */
         .site-footer { text-align:center; padding:36px 20px 16px; font-size:11px; color:var(--muted); letter-spacing:0.06em; }
 
@@ -1331,6 +1411,22 @@
 })();
 </script>
 
+<!-- ── ORDER CONFIRMED MODAL ── -->
+<div id="orderConfirmedModal" onclick="if(event.target===this)closeOrderConfirmedModal()">
+    <div class="ocm-card">
+        <div class="ocm-check">✓</div>
+        <p class="ocm-headline">Order Confirmed!</p>
+        <p class="ocm-sub" id="ocmSub">Hunter's Cookies</p>
+        <div class="ocm-order-num" id="ocmOrderNumWrap" style="display:none;">
+            <p class="ocm-order-label">Order Number</p>
+            <p class="ocm-order-val" id="ocmOrderNum"></p>
+        </div>
+        <div class="ocm-items" id="ocmItems"></div>
+        <p class="ocm-note" id="ocmNote">A confirmation email is on its way to your inbox.</p>
+        <button class="ocm-close" onclick="closeOrderConfirmedModal()">Got it — thanks!</button>
+    </div>
+</div>
+
 <footer class="site-footer">
     <p style="font-size:13px;color:#7a8a7e;margin:0 0 10px;">Follow us on Instagram</p>
     <a href="https://www.instagram.com/hunterscookiesdanville" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;background:#1B4D3E;color:#FFFDD0;text-decoration:none;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;margin-bottom:20px;">
@@ -1511,6 +1607,34 @@ function showShipStepAlert(msg) {
     el.style.background = 'rgba(239,68,68,0.1)';
     el.style.color = '#dc2626';
     el.style.border = '1px solid rgba(239,68,68,0.3)';
+}
+
+function showOrderConfirmedModal(opts) {
+    // opts: { orderNum, items (html string), note, sub }
+    var sub = document.getElementById('ocmSub');
+    var numWrap = document.getElementById('ocmOrderNumWrap');
+    var numEl = document.getElementById('ocmOrderNum');
+    var itemsEl = document.getElementById('ocmItems');
+    var noteEl = document.getElementById('ocmNote');
+    if (sub) sub.textContent = opts.sub || "Hunter's Cookies";
+    if (opts.orderNum) {
+        if (numEl) numEl.textContent = opts.orderNum;
+        if (numWrap) numWrap.style.display = 'block';
+    } else {
+        if (numWrap) numWrap.style.display = 'none';
+    }
+    if (itemsEl) itemsEl.innerHTML = opts.items || '';
+    if (noteEl) noteEl.textContent = opts.note || 'A confirmation email is on its way to your inbox.';
+    var modal = document.getElementById('orderConfirmedModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+function closeOrderConfirmedModal() {
+    var modal = document.getElementById('orderConfirmedModal');
+    if (modal) modal.classList.remove('show');
+    document.body.style.overflow = '';
 }
 
 function goToLocalStep(n) {
@@ -2029,10 +2153,21 @@ async function submitShipOrder(paymentMethodId, tokenId, isFree = false) {
             if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
             return false;
         }
-        const successMsg = document.getElementById('shipSuccessMsg');
-        if (successMsg) successMsg.innerHTML = `${qty} cookie${qty > 1 ? 's' : ''} on the way to ${city}, ${state}!<br><span style="font-size:11px;color:rgba(255,253,208,0.5);">${result.order_number ? 'Order ' + result.order_number + ' · ' : ''}Check your email for confirmation.</span>`;
-        const banner = document.getElementById('shipSuccessBanner');
-        if (banner) banner.style.display = 'block';
+        const shipParts = [];
+        if (shipCart.A > 0) shipParts.push(`<div style="display:flex;justify-content:space-between;"><span>Chocolate Chunk × ${shipCart.A}</span><span>$${(shipCart.A * SHIP_PRICE).toFixed(2)}</span></div>`);
+        if (shipCart.B > 0) shipParts.push(`<div style="display:flex;justify-content:space-between;"><span>Snickerdoodle × ${shipCart.B}</span><span>$${(shipCart.B * SHIP_PRICE).toFixed(2)}</span></div>`);
+        const shipTotal = ((qty * SHIP_PRICE) + (selectedShipRate ? parseFloat(selectedShipRate.price) : 0)).toFixed(2);
+        const shipItemsHtml = shipParts.join('') +
+            (selectedShipRate ? `<div style="display:flex;justify-content:space-between;margin-top:4px;font-size:12px;color:#6b7280;"><span>Shipping</span><span>$${parseFloat(selectedShipRate.price).toFixed(2)}</span></div>` : '') +
+            `<div style="display:flex;justify-content:space-between;border-top:1px solid #e5e7eb;margin-top:8px;padding-top:8px;font-weight:700;"><span>Total</span><span style="color:#1B4D3E;">$${shipTotal}</span></div>` +
+            `<div style="margin-top:6px;font-size:11px;color:#9ca3af;">Shipping to ${city}, ${state}</div>`;
+        const firstName = name.split(' ')[0];
+        showOrderConfirmedModal({
+            sub: `On the way, ${firstName}!`,
+            orderNum: result.order_number || '',
+            items: shipItemsHtml,
+            note: 'A confirmation email is on its way. Your cookies will ship within 1–2 business days.'
+        });
         if (btn) btn.style.display = 'none';
         shipCart = { A: 0, B: 0 };
         renderShipCart();
@@ -2626,17 +2761,18 @@ async function processStripePayment(paymentMethodId) {
     if (cart.B > 0) parts.push(`${cart.B}x Snickerdoodle`);
     const firstName = name.split(' ')[0];
     const orderNum = res.order_number || '';
-    document.getElementById('successTitle').textContent = `You're in, ${firstName}!`;
-    if (orderNum) {
-        const onEl = document.getElementById('successOrderNum');
-        if (onEl) { onEl.textContent = orderNum; onEl.closest('[data-order-wrap]').style.display = 'block'; }
-    }
-    document.getElementById('successMsg').innerHTML =
-        `${parts.join(' & ')} &nbsp;·&nbsp; ${qty} cookie${qty>1?'s':''} &nbsp;·&nbsp; ${discountApplied ? 'Complimentary' : '$'+qty+'.00'}<br><span style="font-size:11px;color:rgba(255,253,208,0.5);">Pickup: ${pickup}</span>`;
-    document.getElementById('successBanner').classList.add('show');
+    const priceStr = discountApplied ? 'Complimentary' : '$' + qty + '.00';
+    const itemsHtml = parts.map(p => `<div style="display:flex;justify-content:space-between;"><span>${p}</span></div>`).join('') +
+        `<div style="display:flex;justify-content:space-between;border-top:1px solid #e5e7eb;margin-top:8px;padding-top:8px;font-weight:700;"><span>Total</span><span style="color:#1B4D3E;">${priceStr}</span></div>` +
+        `<div style="margin-top:6px;font-size:11px;color:#9ca3af;">Pickup window: ${pickup}</div>`;
+    showOrderConfirmedModal({
+        sub: `You're in, ${firstName}!`,
+        orderNum: orderNum,
+        items: itemsHtml,
+        note: 'A confirmation email is on its way. Pickup location will be sent once the ordering window closes.'
+    });
     document.getElementById('orderArea').style.opacity = '0.4';
     document.getElementById('orderArea').style.pointerEvents = 'none';
-    document.getElementById('successBanner').scrollIntoView({ behavior:'smooth', block:'center' });
     cart = { A:0, B:0 };
     ['A','B'].forEach(f => {
         const qtyEl = document.getElementById('localQty'+f);
