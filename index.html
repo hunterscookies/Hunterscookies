@@ -1655,11 +1655,13 @@ function closeOrderConfirmedModal() {
         if (freeBtn) { freeBtn.disabled = false; freeBtn.textContent = 'Place Order'; }
         // Go back to step 1
         goToLocalStep(1);
-        // Scroll to top of the local drop section
-        var localArea = document.getElementById('localOrderArea');
-        if (localArea) {
-            var top = localArea.getBoundingClientRect().top + window.scrollY - 70;
+        // Scroll to very top of the Local Drops tab
+        var tabLocal = document.getElementById('tabLocal');
+        if (tabLocal) {
+            var top = tabLocal.getBoundingClientRect().top + window.scrollY - 80;
             window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
 }
