@@ -1997,8 +1997,8 @@ function showContactForm(type) {
     document.getElementById('contactFormGeneral').style.display = isOrder ? 'none' : 'block';
     document.getElementById('contactFormOrder').style.display   = isOrder ? 'block' : 'none';
     document.getElementById('contactSuccess').style.display     = 'none';
-    const activeStyle   = 'flex:1;padding:14px 10px;border-radius:14px;border:2px solid var(--hg);background:var(--hg);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;';
-    const inactiveStyle = 'flex:1;padding:14px 10px;border-radius:14px;border:2px solid var(--hg);background:transparent;color:var(--hg-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;';
+    const activeStyle   = "flex:1;padding:14px 10px;border-radius:14px;border:2px solid var(--hg);background:var(--hg);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;";
+    const inactiveStyle = "flex:1;padding:14px 10px;border-radius:14px;border:2px solid var(--hg);background:transparent;color:var(--hg-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;";
     document.getElementById('toggleGeneral').style.cssText = isOrder ? inactiveStyle : activeStyle;
     document.getElementById('toggleOrder').style.cssText   = isOrder ? activeStyle   : inactiveStyle;
 }
