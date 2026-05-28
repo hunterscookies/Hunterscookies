@@ -1270,7 +1270,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbwumsKpUSGycYPJzxnYa4SDZMZCXx-W2KiiCbtGH-UkmFg-7Gqc7wTprK2-MDruJBAc/exec';
+const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbz2xHNn1mHTvIQYng4Gi22Qwdhitfx4u-vxOrWwrz7SYks3OPnxVfaSkPuOMRTg6o6L/exec';
 const STRIPE_KEY  = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL       = 30;
 const MAX_ORDER   = 6;
@@ -2385,7 +2385,7 @@ async function processStripePayment(paymentMethodId) {
     };
     let res;
     try {
-        const r = await fetch(SHEET_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const r = await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
         res = await r.json();
         console.log('Response:', JSON.stringify(res));
     } catch (e) {
