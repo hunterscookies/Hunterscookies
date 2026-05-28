@@ -233,6 +233,8 @@
         .ship-dot-label { font-size:9px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); text-align:center; }
         .ship-progress-line { flex:1; height:2px; background:var(--border); min-width:16px; transition:background 0.25s; }
         .ship-line-done { background:var(--hg-dark) !important; }
+        #shipIntroSection { overflow:hidden; max-height:900px; opacity:1; transition:max-height 0.55s ease, opacity 0.4s ease, margin-bottom 0.4s ease; }
+        #shipIntroSection.ship-intro-collapsed { max-height:0; opacity:0; margin-bottom:0 !important; }
 
         /* Chip selector */
         .chips-label { font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(27,77,62,0.5); margin-bottom:12px; margin-top:14px; }
@@ -696,6 +698,7 @@
     <!-- ── SHIPPED COOKIES TAB ── -->
     <div id="tabShip" class="tab-panel">
 
+        <div id="shipIntroSection">
         <!-- ── INTRO ── -->
         <div style="text-align:center;padding:36px 0 28px;">
             <p style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:var(--hg-dark);line-height:1.15;margin-bottom:0;">Get Cookies Shipped</p>
@@ -748,6 +751,8 @@
                 <p style="font-size:15px;font-weight:700;color:var(--cream);">California only <span style="font-size:11px;font-weight:400;opacity:0.6;">(for now)</span></p>
             </div>
         </div>
+
+        </div><!-- end #shipIntroSection -->
 
         <!-- ── SHIP WINDOW COUNTDOWN ── -->
         <div id="shipWindowBanner" style="border-radius:16px;padding:20px;text-align:center;margin-bottom:20px;transition:background 0.3s;">
@@ -1169,11 +1174,20 @@ function renderShipCart() {
         cont1.style.opacity = ok ? '1' : '0.4';
         cont1.style.cursor = ok ? 'pointer' : 'not-allowed';
     }
+    updateShipIntroMode(qty);
     // Show Apple Pay only when cart meets minimum
     const shipApplePay = document.getElementById('shipApplePayContainer');
     if (shipApplePay && shipApplePay.dataset.available === 'true') {
         shipApplePay.style.display = qty >= SHIP_MIN ? 'block' : 'none';
     }
+}
+
+function updateShipIntroMode(qty) {
+    const intro = document.getElementById('shipIntroSection');
+    if (!intro) return;
+    if (qty === undefined) qty = shipCart.A + shipCart.B;
+    if (qty > 0) intro.classList.add('ship-intro-collapsed');
+    else intro.classList.remove('ship-intro-collapsed');
 }
 
 function showShipStepAlert(msg) {
@@ -1208,13 +1222,7 @@ function goToShipStep(n) {
         if (state.toUpperCase() !== 'CA') { showShipStepAlert('We currently ship within California only.'); return; }
         if (!selectedShipRate) { showShipStepAlert('Please select a shipping option above.'); return; }
         // Populate step 4 cart lines
-        const s4lines = document.getElementById('shipStep4Lines');
-        if (s4lines) {
-            let lh = '';
-            if (shipCart.A > 0) lh += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;"><span>Chocolate Chunk × ${shipCart.A}</span><span>$${(shipCart.A * SHIP_PRICE).toFixed(2)}</span></div>`;
-            if (shipCart.B > 0) lh += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;"><span>Snickerdoodle × ${shipCart.B}</span><span>$${(shipCart.B * SHIP_PRICE).toFixed(2)}</span></div>`;
-            s4lines.innerHTML = lh;
-        }
+        refreshStep4Lines();
         updateShipDeliverySummary();
         updateShipTotal();
         // Update Apple Pay amount
@@ -1251,9 +1259,12 @@ function goToShipStep(n) {
         lbl.style.fontWeight = (step === n) ? '700' : (step < n ? '600' : '400');
     });
     currentShipStep = n;
-    // Scroll to top of tab
-    const tabShip = document.getElementById('tabShip');
-    if (tabShip) { tabShip.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    // Scroll to just above the step indicator (not to the top of the whole tab)
+    const orderArea = document.getElementById('shipOrderArea');
+    if (orderArea) {
+        const top = orderArea.getBoundingClientRect().top + window.scrollY - 70;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
 }
 
 function tickShip() {
@@ -1352,6 +1363,8 @@ function applyShipDiscount() {
         if (cardContainer)  cardContainer.style.display  = 'block';
         if (payNote) payNote.style.display = 'block';
     }
+    refreshStep4Lines();
+    updateShipTotal();
 }
 
 // ── ADDRESS AUTOCOMPLETE (Nominatim) ─────────────────────
@@ -1426,13 +1439,29 @@ function updateShipTotal() {
     if (!totalRow || !totalEl) return;
     const cookies = (shipCart.A + shipCart.B) * SHIP_PRICE;
     if (selectedShipRate && cookies > 0) {
-        const grand = cookies + parseFloat(selectedShipRate.price);
+        const grand = shipDiscountApplied ? 0 : cookies + parseFloat(selectedShipRate.price);
         totalEl.textContent = `$${grand.toFixed(2)}`;
         totalRow.style.display = 'flex';
     } else {
         totalRow.style.display = 'none';
     }
     updateShipPayRequest();
+}
+
+function refreshStep4Lines() {
+    const el = document.getElementById('shipStep4Lines');
+    if (!el) return;
+    let html = '';
+    if (shipCart.A > 0) html += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;"><span>Chocolate Chunk × ${shipCart.A}</span><span>$${(shipCart.A * SHIP_PRICE).toFixed(2)}</span></div>`;
+    if (shipCart.B > 0) html += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;"><span>Snickerdoodle × ${shipCart.B}</span><span>$${(shipCart.B * SHIP_PRICE).toFixed(2)}</span></div>`;
+    if (selectedShipRate) {
+        html += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;"><span>Shipping (${selectedShipRate.carrier || ''} ${selectedShipRate.service})</span><span>$${parseFloat(selectedShipRate.price).toFixed(2)}</span></div>`;
+    }
+    if (shipDiscountApplied) {
+        const subtotal = (shipCart.A + shipCart.B) * SHIP_PRICE + (selectedShipRate ? parseFloat(selectedShipRate.price) : 0);
+        html += `<div style="display:flex;justify-content:space-between;font-size:13px;color:#16a34a;margin-bottom:6px;font-weight:600;"><span>Discount (ITALY)</span><span>-$${subtotal.toFixed(2)}</span></div>`;
+    }
+    el.innerHTML = html;
 }
 
 function addShipBusinessDays(startDate, days) {
