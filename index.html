@@ -284,8 +284,8 @@
         .ship-dot-label { font-size:9px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); text-align:center; }
         .ship-progress-line { flex:1; height:2px; background:var(--border); min-width:16px; transition:background 0.25s; }
         .ship-line-done { background:var(--hg-dark) !important; }
-        #shipIntroSection { overflow:hidden; max-height:900px; opacity:1; transition:max-height 0.55s ease, opacity 0.4s ease, margin-bottom 0.4s ease; }
-        #shipIntroSection.ship-intro-collapsed { max-height:0; opacity:0; margin-bottom:0 !important; }
+        #shipLockOverlay { position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(245,243,232,0.88);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border-radius:16px;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px 24px; }
+        #shipOrderArea { position:relative; }
 
         /* Chip selector */
         .chips-label { font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(27,77,62,0.5); margin-bottom:12px; margin-top:14px; }
@@ -826,6 +826,15 @@
 
         <div id="shipOrderArea">
 
+        <!-- ── SHIP LOCK OVERLAY ── -->
+        <div id="shipLockOverlay">
+            <p style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;">Shipping Opens</p>
+            <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);margin:0 0 6px;">July 1, 2026</p>
+            <div id="shipLockCountdown" style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--hg);margin-bottom:20px;"></div>
+            <button onclick="previewShipOrder()" style="padding:13px 28px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.03em;">Preview Order</button>
+            <p style="font-size:11px;color:var(--muted);margin:10px 0 0;">See pricing and options — you won't be charged</p>
+        </div>
+
         <!-- ── STEP PROGRESS ── -->
         <div style="display:flex;align-items:flex-start;justify-content:center;margin-bottom:8px;gap:0;">
             <div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:56px;">
@@ -1270,7 +1279,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbw9OkxmsJY-oHKrxS8_jL-nEGISS0iAYyRbJOrK_AxKVTt8S6SLoY28EXzCwrmNPBsc/exec';
+const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbx60adA3py9-k5T54ZYcIAplWnBBR-1zdmbMFNLgcrgUdTqJYZcht-qnfHLiR_e_uaM/exec';
 const STRIPE_KEY  = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL       = 30;
 const MAX_ORDER   = 6;
@@ -1364,7 +1373,7 @@ setInterval(tick,1000); tick();
 // ── SHIPPED COOKIES ───────────────────────────
 const SHIP_PRICE   = 5.00;
 const SHIP_MIN     = 12;
-const SHIP_OPEN    = new Date('2026-05-01T00:00:00');
+const SHIP_OPEN    = new Date('2026-07-01T00:00:00');
 const SHIP_CLOSE   = new Date('2026-07-15T23:59:59');
 const SHIP_DATE    = 'August 1';
 let shipCart = { A: 0, B: 0 };
@@ -1406,7 +1415,6 @@ function renderShipCart() {
         cont1.style.opacity = ok ? '1' : '0.4';
         cont1.style.cursor = ok ? 'pointer' : 'not-allowed';
     }
-    updateShipIntroMode(qty);
     // Show Apple Pay only when cart meets minimum
     const shipApplePay = document.getElementById('shipApplePayContainer');
     if (shipApplePay && shipApplePay.dataset.available === 'true') {
@@ -1414,13 +1422,20 @@ function renderShipCart() {
     }
 }
 
-function updateShipIntroMode(qty) {
-    const intro = document.getElementById('shipIntroSection');
-    if (!intro) return;
-    if (qty === undefined) qty = shipCart.A + shipCart.B;
-    if (qty > 0) intro.classList.add('ship-intro-collapsed');
-    else intro.classList.remove('ship-intro-collapsed');
+let isShipPreviewing = false;
+
+function previewShipOrder() {
+    isShipPreviewing = true;
+    const overlay = document.getElementById('shipLockOverlay');
+    if (overlay) overlay.style.display = 'none';
+    const orderArea = document.getElementById('shipOrderArea');
+    if (orderArea) { orderArea.style.opacity = ''; orderArea.style.pointerEvents = ''; }
+    // Keep order button locked
+    const btn = document.getElementById('shipOrderBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Shipping Opens July 1'; }
 }
+
+function updateShipIntroMode() { /* removed — no longer collapses intro */ }
 
 function showShipStepAlert(msg) {
     const el = document.getElementById('shipStep3Alert');
@@ -1503,33 +1518,34 @@ function tickShip() {
     const now = new Date();
     const banner  = document.getElementById('shipWindowBanner');
     const label   = document.getElementById('shipWindowLabel');
-    const orderArea = document.getElementById('shipOrderArea');
     const btn     = document.getElementById('shipOrderBtn');
+    const lockOverlay = document.getElementById('shipLockOverlay');
+    const lockCd  = document.getElementById('shipLockCountdown');
     if (!banner) return;
 
     if (now < SHIP_OPEN) {
         const diff = SHIP_OPEN - now;
         const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000),
               m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-        label.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,253,208,0.5);display:block;margin-bottom:4px;">Shipping Orders Open July 1</span>
-            <span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--cream);">${String(d).padStart(2,'0')}d &nbsp;${String(h).padStart(2,'0')}h &nbsp;${String(m).padStart(2,'0')}m &nbsp;${String(s).padStart(2,'0')}s</span>`;
-        banner.style.background = 'rgba(27,77,62,0.08)';
-        if (orderArea) { orderArea.style.opacity='0.4'; orderArea.style.pointerEvents='none'; }
-        if (btn) { btn.disabled=true; }
+        const cdStr = `${String(d).padStart(2,'0')}d  ${String(h).padStart(2,'0')}h  ${String(m).padStart(2,'0')}m  ${String(s).padStart(2,'0')}s`;
+        if (lockCd) lockCd.textContent = cdStr;
+        if (lockOverlay && !isShipPreviewing) lockOverlay.style.display = 'flex';
+        label.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,253,208,0.5);display:block;margin-bottom:4px;">Shipping Opens July 1</span><span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--cream);">${cdStr}</span>`;
+        banner.style.background = 'rgba(27,77,62,0.35)';
+        if (btn) { btn.disabled = true; btn.textContent = 'Shipping Opens July 1'; btn.style.opacity = '0.5'; }
     } else if (now <= SHIP_CLOSE) {
         const diff = SHIP_CLOSE - now;
         const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000),
               m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-        label.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fbbf24;display:block;margin-bottom:4px;">Orders Close July 15 &nbsp;·&nbsp; Ships ${SHIP_DATE}</span>
-            <span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--cream);">${String(d).padStart(2,'0')}d &nbsp;${String(h).padStart(2,'0')}h &nbsp;${String(m).padStart(2,'0')}m &nbsp;${String(s).padStart(2,'0')}s</span>`;
+        if (lockOverlay) lockOverlay.style.display = 'none';
+        label.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fbbf24;display:block;margin-bottom:4px;">Orders Close July 15 &nbsp;·&nbsp; Ships ${SHIP_DATE}</span><span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--cream);">${String(d).padStart(2,'0')}d &nbsp;${String(h).padStart(2,'0')}h &nbsp;${String(m).padStart(2,'0')}m &nbsp;${String(s).padStart(2,'0')}s</span>`;
         banner.style.background = 'rgba(27,77,62,0.55)';
-        if (orderArea) { orderArea.style.opacity=''; orderArea.style.pointerEvents=''; }
-        if (btn) { btn.disabled=false; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; btn.style.opacity = ''; }
     } else {
+        if (lockOverlay) lockOverlay.style.display = 'none';
         label.innerHTML = `<span style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--cream);">Orders Are Closed</span><br><span style="font-size:12px;color:rgba(255,253,208,0.5);">Next window opens July 1.</span>`;
         banner.style.background = 'rgba(27,77,62,0.08)';
-        if (orderArea) { orderArea.style.opacity='0.4'; orderArea.style.pointerEvents='none'; }
-        if (btn) { btn.disabled=true; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Orders Closed'; btn.style.opacity = '0.5'; }
     }
 }
 setInterval(tickShip, 1000); tickShip();
