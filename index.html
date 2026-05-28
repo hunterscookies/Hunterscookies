@@ -2178,7 +2178,7 @@ function switchTab(tab) {
     const labels = { local: 'Local Drops', ship: 'Shipped Orders', about: 'About', reviews: 'Reviews', contact: 'Contact' };
     const el = document.getElementById('activeTabLabel');
     if (el) el.textContent = labels[tab] || tab;
-    try { localStorage.setItem('activeTab', tab); } catch(e) {}
+    history.replaceState(null, '', '#' + tab);
     closeNav();
     if (tab === 'reviews') loadReviews();
 }
@@ -2195,13 +2195,20 @@ function closeNav() {
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.tab-nav')) closeNav();
 });
-// Restore last visited tab
+// Route to tab from URL hash, e.g. hunterscookies.com/#ship
 (function() {
     if (window.__initTab) return;
     const valid = ['local','ship','about','reviews','contact'];
-    const saved = localStorage.getItem('activeTab');
-    switchTab(valid.includes(saved) ? saved : 'local');
+    const hash  = location.hash.replace('#', '');
+    switchTab(valid.includes(hash) ? hash : 'local');
 })();
+
+// Support browser back/forward between tabs
+window.addEventListener('hashchange', function() {
+    const valid = ['local','ship','about','reviews','contact'];
+    const hash  = location.hash.replace('#', '');
+    if (valid.includes(hash)) switchTab(hash);
+});
 
 // ── STICKY HEADER ─────────────────────────────
 window.addEventListener('scroll', () => {
