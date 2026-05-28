@@ -493,9 +493,6 @@
     <!-- Mini brand header (appears on scroll) -->
     <div id="stickyHeader">
         <span class="sticky-brand">Hunter's Cookies</span>
-        <div class="sticky-cart-pill" onclick="document.getElementById('orderArea').scrollIntoView({behavior:'smooth',block:'start'});">
-            <span>Order Now</span>
-        </div>
     </div>
     <!-- Tab nav (hamburger) -->
     <div class="tab-nav">
@@ -580,6 +577,10 @@
         <div class="success-icon">🍪</div>
         <p class="success-label">Founder's Drop</p>
         <p class="success-title" id="successTitle">You're in!</p>
+        <div data-order-wrap style="display:none;margin-bottom:10px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,253,208,0.5);margin:0 0 2px;">Order Number</p>
+            <p id="successOrderNum" style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--cream);margin:0;letter-spacing:0.05em;"></p>
+        </div>
         <div class="success-order-box">
             <p id="successMsg"></p>
         </div>
@@ -1073,57 +1074,65 @@
     <div id="tabContact" class="tab-panel">
 
         <div style="text-align:center;padding:36px 0 24px;">
-            <p style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:var(--hg-dark);line-height:1.15;margin-bottom:6px;">Get in Touch</p>
-            <p style="font-size:13px;color:var(--muted);max-width:280px;margin:0 auto;line-height:1.6;">Questions, catering requests, or just want to say hi — we'd love to hear from you.</p>
+            <p style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:var(--hg-dark);line-height:1.2;margin-bottom:8px;">Get in Touch</p>
+            <p style="font-size:13px;color:var(--muted);max-width:280px;margin:0 auto;line-height:1.6;">Questions, catering requests, or just want to say hi.</p>
         </div>
 
-        <div class="card" style="padding:28px;margin-bottom:14px;">
+        <!-- Toggle buttons -->
+        <div style="display:flex;gap:10px;margin-bottom:20px;">
+            <button id="toggleGeneral" onclick="showContactForm('general')"
+                style="flex:1;padding:14px 10px;border-radius:14px;border:2px solid var(--hg);background:var(--hg);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;">
+                General Inquiry
+            </button>
+            <button id="toggleOrder" onclick="showContactForm('order')"
+                style="flex:1;padding:14px 10px;border-radius:14px;border:2px solid var(--hg);background:transparent;color:var(--hg-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;">
+                My Order
+            </button>
+        </div>
+
+        <!-- General Inquiry Form -->
+        <div id="contactFormGeneral" class="card" style="padding:28px;margin-bottom:14px;">
             <div style="display:flex;flex-direction:column;gap:14px;">
 
-                <!-- Name -->
                 <div>
-                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--hg);display:block;margin-bottom:6px;">Name</label>
+                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Name</label>
                     <input id="contactName" type="text" placeholder="Your full name" autocomplete="name"
-                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;box-sizing:border-box;">
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;">
                 </div>
 
-                <!-- Email -->
                 <div>
-                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--hg);display:block;margin-bottom:6px;">Email</label>
+                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Email</label>
                     <input id="contactEmail" type="email" placeholder="your@email.com" autocomplete="email"
-                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;box-sizing:border-box;">
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;">
                 </div>
 
-                <!-- Phone -->
                 <div>
-                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--hg);display:block;margin-bottom:6px;">Phone</label>
+                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Phone</label>
                     <input id="contactPhone" type="tel" placeholder="(XXX) XXX-XXXX" autocomplete="tel" maxlength="14"
                         oninput="formatContactPhone(this)"
-                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;box-sizing:border-box;">
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;">
                 </div>
 
-                <!-- Inquiry Type -->
                 <div>
-                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--hg);display:block;margin-bottom:6px;">Inquiry Type</label>
+                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Inquiry Type</label>
                     <div style="position:relative;">
                         <select id="contactType"
-                            style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;box-sizing:border-box;">
+                            style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);appearance:none;-webkit-appearance:none;box-sizing:border-box;">
                             <option value="" disabled selected>Select a topic</option>
                             <option value="General">General Question</option>
                             <option value="Catering">Catering Request</option>
                             <option value="Suggestion">Suggestion</option>
                             <option value="Feedback">Feedback</option>
                         </select>
-                        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:11px;color:var(--muted);">▾</span>
+                        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);">&#8964;</span>
                     </div>
                 </div>
 
-                <!-- How did you hear -->
                 <div>
-                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--hg);display:block;margin-bottom:6px;">How did you hear about us?</label>
+                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">How did you hear about us?</label>
                     <div style="position:relative;">
                         <select id="contactSource"
-                            style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;box-sizing:border-box;">
+                            style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);appearance:none;-webkit-appearance:none;box-sizing:border-box;">
                             <option value="" disabled selected>Select an option</option>
                             <option value="Instagram">Instagram</option>
                             <option value="Word of Mouth">Word of Mouth</option>
@@ -1131,30 +1140,70 @@
                             <option value="Friend / Family">Friend / Family</option>
                             <option value="Other">Other</option>
                         </select>
-                        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:11px;color:var(--muted);">▾</span>
+                        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);">&#8964;</span>
                     </div>
                 </div>
 
-                <!-- Message -->
                 <div>
-                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--hg);display:block;margin-bottom:6px;">Message</label>
-                    <textarea id="contactMessage" placeholder="Write your message here…" rows="5"
-                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;resize:vertical;box-sizing:border-box;line-height:1.6;"></textarea>
+                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Message</label>
+                    <textarea id="contactMessage" placeholder="Write your message here..." rows="5"
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;resize:vertical;"></textarea>
                 </div>
 
-                <!-- Alert -->
                 <div id="contactAlert" style="display:none;padding:10px 14px;border-radius:10px;font-size:13px;"></div>
 
-                <!-- Submit -->
                 <button id="contactSubmitBtn" onclick="submitContactForm()"
-                    style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.01em;transition:opacity 0.2s;">
+                    style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.02em;">
                     Send Message
                 </button>
 
             </div>
         </div>
 
-        <!-- Success banner -->
+        <!-- Order Inquiry Form -->
+        <div id="contactFormOrder" class="card" style="display:none;padding:28px;margin-bottom:14px;">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+
+                <div style="display:flex;gap:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Your Name</label>
+                        <input id="oiName" type="text" placeholder="Full name" autocomplete="name"
+                            style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Order Number</label>
+                        <input id="oiOrderNum" type="text" placeholder="HC-0042" autocomplete="off"
+                            style="width:100%;padding:11px 14px;border:1.5px solid var(--hg);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;letter-spacing:0.05em;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Email</label>
+                    <input id="oiEmail" type="email" placeholder="your@email.com" autocomplete="email"
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">What can we help with?</label>
+                    <textarea id="oiMessage" placeholder="Write your question here..." rows="4"
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;resize:vertical;"></textarea>
+                </div>
+
+                <div id="oiAlert" style="display:none;padding:10px 14px;border-radius:10px;font-size:13px;background:#fef2f2;color:#991b1b;"></div>
+
+                <button id="oiSubmitBtn" onclick="submitOrderInquiry()"
+                    style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.02em;">
+                    Send to Hunter
+                </button>
+
+                <div id="oiSuccess" style="display:none;text-align:center;padding:4px 0;">
+                    <p style="font-size:14px;font-weight:600;color:var(--hg-dark);margin:0;">Message sent. We'll be in touch shortly.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- General success banner -->
         <div id="contactSuccess" style="display:none;background:var(--hg);border-radius:16px;padding:28px 24px;text-align:center;margin-bottom:20px;">
             <p style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--cream);margin-bottom:6px;">Message Sent!</p>
             <p style="font-size:13px;color:rgba(255,253,208,0.8);">Thanks for reaching out. We'll get back to you soon.</p>
@@ -1221,7 +1270,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbxrxcdN3jTb7i1d3T2DfYbn_6U5DYy1YCJnB54QjoDiDBCQ9oHBn6I6JxH9vvgHt2Mr/exec';
+const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbwumsKpUSGycYPJzxnYa4SDZMZCXx-W2KiiCbtGH-UkmFg-7Gqc7wTprK2-MDruJBAc/exec';
 const STRIPE_KEY  = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL       = 30;
 const MAX_ORDER   = 6;
@@ -1841,7 +1890,7 @@ async function submitShipOrder(paymentMethodId, tokenId, isFree = false) {
             return false;
         }
         const successMsg = document.getElementById('shipSuccessMsg');
-        if (successMsg) successMsg.innerHTML = `${qty} cookie${qty > 1 ? 's' : ''} on the way to ${city}, ${state}!<br><span style="font-size:11px;color:rgba(255,253,208,0.5);">Check your email for confirmation.</span>`;
+        if (successMsg) successMsg.innerHTML = `${qty} cookie${qty > 1 ? 's' : ''} on the way to ${city}, ${state}!<br><span style="font-size:11px;color:rgba(255,253,208,0.5);">${result.order_number ? 'Order ' + result.order_number + ' · ' : ''}Check your email for confirmation.</span>`;
         const banner = document.getElementById('shipSuccessBanner');
         if (banner) banner.style.display = 'block';
         if (btn) btn.style.display = 'none';
@@ -1943,19 +1992,67 @@ function showContactAlert(msg, type) {
     el.style.border = `1px solid ${type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'}`;
 }
 
+function showContactForm(type) {
+    const isOrder = type === 'order';
+    document.getElementById('contactFormGeneral').style.display = isOrder ? 'none' : 'block';
+    document.getElementById('contactFormOrder').style.display   = isOrder ? 'block' : 'none';
+    document.getElementById('contactSuccess').style.display     = 'none';
+    const activeStyle   = 'flex:1;padding:14px 10px;border-radius:14px;border:2px solid var(--hg);background:var(--hg);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;';
+    const inactiveStyle = 'flex:1;padding:14px 10px;border-radius:14px;border:2px solid var(--hg);background:transparent;color:var(--hg-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;';
+    document.getElementById('toggleGeneral').style.cssText = isOrder ? inactiveStyle : activeStyle;
+    document.getElementById('toggleOrder').style.cssText   = isOrder ? activeStyle   : inactiveStyle;
+}
+
+async function submitOrderInquiry() {
+    const name     = document.getElementById('oiName').value.trim();
+    const email    = document.getElementById('oiEmail').value.trim();
+    const orderNum = document.getElementById('oiOrderNum').value.trim().toUpperCase();
+    const message  = document.getElementById('oiMessage').value.trim();
+    const btn      = document.getElementById('oiSubmitBtn');
+    const alertEl  = document.getElementById('oiAlert');
+    alertEl.style.display = 'none';
+    if (!name)    { alertEl.textContent = 'Please enter your name.'; alertEl.style.display = 'block'; return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alertEl.textContent = 'Please enter a valid email.'; alertEl.style.display = 'block'; return; }
+    if (!orderNum) { alertEl.textContent = 'Please enter your order number from your confirmation email.'; alertEl.style.display = 'block'; return; }
+    if (!message)  { alertEl.textContent = 'Please write a message.'; alertEl.style.display = 'block'; return; }
+    btn.disabled = true; btn.textContent = 'Sending...';
+    try {
+        const res = await fetch(SHEET_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ type: 'contact', name, email, phone: '', inquiry_type: 'My Order', source: 'Order Inquiry', message, order_number: orderNum })
+        });
+        const result = await res.json();
+        if (result && result.success) {
+            btn.style.display = 'none';
+            document.getElementById('oiSuccess').style.display = 'block';
+        } else {
+            alertEl.textContent = (result && result.error) || 'Something went wrong. Please try again.';
+            alertEl.style.display = 'block';
+            btn.disabled = false; btn.textContent = 'Send to Hunter';
+        }
+    } catch(e) {
+        alertEl.textContent = 'Network error. Please try again.';
+        alertEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Send to Hunter';
+    }
+}
+
 async function submitContactForm() {
-    const name    = document.getElementById('contactName').value.trim();
-    const email   = document.getElementById('contactEmail').value.trim();
-    const phone   = document.getElementById('contactPhone').value.trim();
-    const type    = document.getElementById('contactType').value;
-    const source  = document.getElementById('contactSource').value;
-    const message = document.getElementById('contactMessage').value.trim();
-    const btn     = document.getElementById('contactSubmitBtn');
+    const name       = document.getElementById('contactName').value.trim();
+    const email      = document.getElementById('contactEmail').value.trim();
+    const phone      = document.getElementById('contactPhone').value.trim();
+    const type       = document.getElementById('contactType').value;
+    const source     = document.getElementById('contactSource').value;
+    const message    = document.getElementById('contactMessage').value.trim();
+    const orderNum   = document.getElementById('contactOrderNum').value.trim().toUpperCase();
+    const btn        = document.getElementById('contactSubmitBtn');
     document.getElementById('contactAlert').style.display = 'none';
     if (!name)    { showContactAlert('Please enter your name.', 'error'); return; }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showContactAlert('Please enter a valid email address.', 'error'); return; }
     if (!phone || phone.replace(/\D/g,'').length < 10) { showContactAlert('Please enter a valid 10-digit phone number.', 'error'); return; }
     if (!type)    { showContactAlert('Please select an inquiry type.', 'error'); return; }
+    if (type === 'My Order' && !orderNum) { showContactAlert('Please enter your order number from your confirmation email.', 'error'); return; }
     if (!source)  { showContactAlert('Please tell us how you heard about us.', 'error'); return; }
     if (!message) { showContactAlert('Please write a message.', 'error'); return; }
     btn.disabled = true; btn.textContent = 'Sending…';
@@ -1963,7 +2060,7 @@ async function submitContactForm() {
         const res = await fetch(SHEET_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ type: 'contact', name, email, phone, inquiry_type: type, source, message })
+            body: JSON.stringify({ type: 'contact', name, email, phone, inquiry_type: type, source, message, order_number: orderNum || null })
         });
         const result = await res.json();
         if (result && result.success) {
@@ -2306,7 +2403,12 @@ async function processStripePayment(paymentMethodId) {
     if (cart.A > 0) parts.push(`${cart.A}x Chocolate Chunk`);
     if (cart.B > 0) parts.push(`${cart.B}x Snickerdoodle`);
     const firstName = name.split(' ')[0];
+    const orderNum = res.order_number || '';
     document.getElementById('successTitle').textContent = `You're in, ${firstName}!`;
+    if (orderNum) {
+        const onEl = document.getElementById('successOrderNum');
+        if (onEl) { onEl.textContent = orderNum; onEl.closest('[data-order-wrap]').style.display = 'block'; }
+    }
     document.getElementById('successMsg').innerHTML =
         `${parts.join(' & ')} &nbsp;·&nbsp; ${qty} cookie${qty>1?'s':''} &nbsp;·&nbsp; ${discountApplied ? 'Complimentary' : '$'+qty+'.00'}<br><span style="font-size:11px;color:rgba(255,253,208,0.5);">Pickup: ${pickup}</span>`;
     document.getElementById('successBanner').classList.add('show');
