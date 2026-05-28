@@ -424,7 +424,11 @@
         .review-meta { font-size:12px; color:var(--muted); margin-top:6px; }
         .rating-big { font-size:64px; font-family:'Cormorant Garamond',serif; font-weight:700; color:var(--hg-dark); line-height:1; }
         .rating-stars-big { color:#f59e0b; font-size:26px; letter-spacing:3px; }
-    </style>
+        /* Prevent iOS auto-zoom on input focus */
+    @media (max-width: 768px) {
+        input, textarea, select { font-size: 16px !important; }
+    }
+</style>
 <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
@@ -1292,7 +1296,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbz7orxOrdy1hGMfojMcK287e6BTUQ99mIzJQOgOz62sIR6x9Nhs47Z_20zlllq0T7as/exec';
+const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbzSUabhos7pKlFNkLbfFnLV_xcj4uduWtWXVNgXrF4M-vGHW8cifdQZH1y3OO7oiho/exec';
 const STRIPE_KEY  = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL       = 30;
 const MAX_ORDER   = 6;
@@ -1802,15 +1806,7 @@ async function fetchShippingRates() {
             return;
         }
 
-        // Only show USPS Priority Mail and UPS Ground
-        const allowed = [
-            { carrier: 'USPS', service: 'Priority Mail' },
-            { carrier: 'UPS',  service: 'Ground' }
-        ];
-        const rates = data.rates.filter(r =>
-            allowed.some(a => r.carrier.toUpperCase() === a.carrier && r.service === a.service)
-        );
-
+        const rates = data.rates || [];
         if (!rates.length) {
             el.innerHTML = '<p style="font-size:12px;color:var(--muted);">Could not load rates right now. Try again shortly.</p>';
             return;
@@ -2182,6 +2178,7 @@ function switchTab(tab) {
     const labels = { local: 'Local Drops', ship: 'Shipped Orders', about: 'About', reviews: 'Reviews', contact: 'Contact' };
     const el = document.getElementById('activeTabLabel');
     if (el) el.textContent = labels[tab] || tab;
+    try { localStorage.setItem('activeTab', tab); } catch(e) {}
     closeNav();
     if (tab === 'reviews') loadReviews();
 }
@@ -2198,10 +2195,12 @@ function closeNav() {
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.tab-nav')) closeNav();
 });
-// Always start on Local Drops
+// Restore last visited tab
 (function() {
     if (window.__initTab) return;
-    switchTab('local');
+    const valid = ['local','ship','about','reviews','contact'];
+    const saved = localStorage.getItem('activeTab');
+    switchTab(valid.includes(saved) ? saved : 'local');
 })();
 
 // ── STICKY HEADER ─────────────────────────────
