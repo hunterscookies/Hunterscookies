@@ -1610,7 +1610,8 @@ function showShipStepAlert(msg) {
 }
 
 function showOrderConfirmedModal(opts) {
-    // opts: { orderNum, items (html string), note, sub }
+    // opts: { orderNum, items (html string), note, sub, type }
+    _ocmType = opts.type || 'local';
     var sub = document.getElementById('ocmSub');
     var numWrap = document.getElementById('ocmOrderNumWrap');
     var numEl = document.getElementById('ocmOrderNum');
@@ -1631,10 +1632,36 @@ function showOrderConfirmedModal(opts) {
         document.body.style.overflow = 'hidden';
     }
 }
+var _ocmType = 'local';
 function closeOrderConfirmedModal() {
     var modal = document.getElementById('orderConfirmedModal');
     if (modal) modal.classList.remove('show');
     document.body.style.overflow = '';
+    if (_ocmType === 'local') {
+        // Restore the order area
+        var orderArea = document.getElementById('localOrderArea');
+        if (orderArea) { orderArea.style.opacity = ''; orderArea.style.pointerEvents = ''; }
+        // Reset form fields
+        ['custName','custEmail','custPhone'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) { el.value = ''; el.classList.remove('error-field'); }
+        });
+        var pw = document.getElementById('pickupWindow');
+        if (pw) pw.selectedIndex = 0;
+        // Reset payment buttons
+        var cardBtn = document.getElementById('cardPayBtn');
+        if (cardBtn) { cardBtn.disabled = false; cardBtn.textContent = 'Confirm Order'; cardBtn.style.opacity = ''; }
+        var freeBtn = document.getElementById('freeOrderBtn');
+        if (freeBtn) { freeBtn.disabled = false; freeBtn.textContent = 'Place Order'; }
+        // Go back to step 1
+        goToLocalStep(1);
+        // Scroll to top of the local drop section
+        var localArea = document.getElementById('localOrderArea');
+        if (localArea) {
+            var top = localArea.getBoundingClientRect().top + window.scrollY - 70;
+            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        }
+    }
 }
 
 function goToLocalStep(n) {
@@ -2163,6 +2190,7 @@ async function submitShipOrder(paymentMethodId, tokenId, isFree = false) {
             `<div style="margin-top:6px;font-size:11px;color:#9ca3af;">Shipping to ${city}, ${state}</div>`;
         const firstName = name.split(' ')[0];
         showOrderConfirmedModal({
+            type: 'ship',
             sub: `On the way, ${firstName}!`,
             orderNum: result.order_number || '',
             items: shipItemsHtml,
@@ -2771,8 +2799,8 @@ async function processStripePayment(paymentMethodId) {
         items: itemsHtml,
         note: 'A confirmation email is on its way. Pickup location will be sent once the ordering window closes.'
     });
-    document.getElementById('orderArea').style.opacity = '0.4';
-    document.getElementById('orderArea').style.pointerEvents = 'none';
+    var localArea = document.getElementById('localOrderArea');
+    if (localArea) { localArea.style.opacity = '0.4'; localArea.style.pointerEvents = 'none'; }
     cart = { A:0, B:0 };
     ['A','B'].forEach(f => {
         const qtyEl = document.getElementById('localQty'+f);
