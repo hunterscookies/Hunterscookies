@@ -573,9 +573,6 @@
         </div>
     </section>
 
-    <!-- ── INLINE ALERT ── -->
-    <div id="inlineAlert"></div>
-
     <!-- ── SUCCESS BANNER ── -->
     <div id="successBanner">
         <div class="success-icon">🍪</div>
@@ -598,10 +595,29 @@
             <p style="font-size:12px;color:var(--hg-dark);line-height:1.5"><strong>Founder's Drop only:</strong> Limited to <strong>6 cookies per customer</strong> at the $1 introductory price. Future drops will be priced at $4.50 per cookie with no limit, as long as not sold out.</p>
         </div>
     </div>
-    <div class="order-layout" id="orderArea">
+    <div id="localOrderArea">
 
-        <!-- Menu -->
-        <div style="position:relative;">
+        <!-- Step progress -->
+        <div style="display:flex;align-items:flex-start;justify-content:center;margin-bottom:24px;gap:0;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:56px;">
+                <div id="localDot1" class="ship-dot ship-dot-active">1</div>
+                <span id="localLabel1" class="ship-dot-label" style="color:var(--hg);font-weight:700;">Choose</span>
+            </div>
+            <div id="localLine12" class="ship-progress-line" style="margin-top:15px;"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:56px;">
+                <div id="localDot2" class="ship-dot">2</div>
+                <span id="localLabel2" class="ship-dot-label">Details</span>
+            </div>
+            <div id="localLine23" class="ship-progress-line" style="margin-top:15px;"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:56px;">
+                <div id="localDot3" class="ship-dot">3</div>
+                <span id="localLabel3" class="ship-dot-label">Payment</span>
+            </div>
+        </div>
+
+        <!-- ── STEP 1: CHOOSE ── -->
+        <div id="localStep1">
+
             <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);text-align:center;margin:0 0 6px;letter-spacing:-0.01em;">This Week's Menu</p>
 
             <!-- Chocolate Chunk -->
@@ -662,28 +678,19 @@
                         style="width:32px;height:32px;border-radius:50%;border:none;background:var(--hg);color:var(--cream);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Sold Out Overlay -->
-        <div id="soldOutOverlay" style="display:none; position:absolute; inset:0; background:rgba(255,251,234,0.93); border-radius:16px; z-index:10; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 20px;">
-            <p style="font-size:2.5rem; margin-bottom:12px;">🍪</p>
-            <p style="font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:700; color:#0f2b22; margin-bottom:10px;">Sold Out</p>
-            <p style="font-size:14px; color:#7a8a7e; line-height:1.6;">Every cookie from this drop has been claimed.<br>We hope to see you for the next drop!</p>
-            <p style="font-size:13px; color:#7a8a7e; margin:18px 0 10px;">Stay up to date for the next drop — follow us on Instagram:</p>
-            <a href="https://www.instagram.com/hunterscookiesdanville" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;background:#1B4D3E;color:#FFFDD0;text-decoration:none;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                @hunterscookiesdanville
-            </a>
-        </div>
+            <button id="localContinue1" onclick="goToLocalStep(2)" disabled
+                style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;opacity:0.45;margin-top:16px;letter-spacing:0.01em;transition:opacity 0.2s;">
+                Continue
+            </button>
 
-        <!-- Cart Summary Bar -->
+        </div><!-- end localStep1 -->
 
-        <!-- Sidebar -->
-        <div id="orderSidebar">
-            <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--hg-dark);text-align:center;margin:0 0 14px;letter-spacing:-0.01em;">Reserve Your Cookies</p>
-            <div class="card sidebar-inner">
+        <!-- ── STEP 2: DETAILS ── -->
+        <div id="localStep2" style="display:none;">
 
-                <!-- Cart lines -->
+            <div class="card" style="padding:24px;margin-bottom:14px;">
+                <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Your Order</p>
                 <div id="cartLines">
                 </div>
 
@@ -691,8 +698,10 @@
                     <span>Total</span>
                     <span id="cartTotal" style="color:var(--hg)">$0.00</span>
                 </div>
+            </div>
 
-                <!-- Fields -->
+            <div class="card" style="padding:24px;margin-bottom:14px;">
+                <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Your Info</p>
                 <div class="fields">
                     <div class="fg">
                         <label>Your Name</label>
@@ -715,9 +724,27 @@
                         </select>
                     </div>
                 </div>
+            </div>
 
+            <div id="localStep2Alert" style="display:none;max-width:580px;margin:0 auto 18px;padding:13px 18px;border-radius:14px;font-size:13px;font-weight:600;"></div>
+
+            <div style="display:flex;gap:10px;margin-bottom:14px;">
+                <button onclick="goToLocalStep(1)" style="flex:1;padding:14px;background:#fff;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:var(--hg-dark);">Back</button>
+                <button onclick="goToLocalStep(3)" style="flex:2;padding:14px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Continue to Payment</button>
+            </div>
+
+        </div><!-- end localStep2 -->
+
+        <!-- ── STEP 3: PAYMENT ── -->
+        <div id="localStep3" style="display:none;">
+
+            <div class="card" style="padding:24px;margin-bottom:14px;">
+                <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Order Summary</p>
+                <div id="localStep3Lines" style="min-height:20px;"></div>
+            </div>
+
+            <div class="card" style="padding:22px;">
                 <div id="inlineAlert" style="display:none;max-width:580px;margin:0 auto 18px;padding:13px 18px;border-radius:14px;font-size:13px;font-weight:600;"></div>
-
                 <!-- Discount Code -->
                 <div id="discountRow" style="margin-bottom:10px;">
                     <div style="display:flex;gap:8px;align-items:center;">
@@ -761,8 +788,25 @@
                     Pickup location announced upon confirmation.
                 </p>
             </div>
+
+            <button onclick="goToLocalStep(2)" style="width:100%;padding:14px;background:#fff;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:var(--hg-dark);margin-top:10px;">Back</button>
+
+        </div><!-- end localStep3 -->
+
+        <div id="soldOutOverlay" style="display:none;position:fixed;inset:0;background:#1b4d3e;z-index:9999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;">
+            <p style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,253,208,0.6);margin:0 0 20px;">Hunter's Cookies — Drop Closed</p>
+            <p style="font-family:'Cormorant Garamond',serif;font-size:3.2rem;font-weight:700;color:#fffdd0;line-height:1.15;margin:0 0 16px;">This Drop Is<br>Sold Out.</p>
+            <p style="font-size:15px;color:rgba(255,253,208,0.75);line-height:1.7;max-width:300px;margin:0 0 36px;">Every cookie from this drop has been claimed. We'll be back soon — follow along so you don't miss the next one.</p>
+            <a href="https://www.instagram.com/hunterscookiesdanville" target="_blank" rel="noopener noreferrer"
+                style="display:inline-flex;align-items:center;gap:10px;background:#fffdd0;color:#1b4d3e;text-decoration:none;padding:16px 28px;border-radius:99px;font-size:15px;font-weight:700;letter-spacing:0.02em;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                @hunterscookiesdanville
+            </a>
+            <p style="font-size:12px;color:rgba(255,253,208,0.4);margin:28px 0 0;">hunterscookies.com &nbsp;·&nbsp; Danville, CA</p>
         </div>
-    </div>
+
+
+    </div><!-- end #localOrderArea -->
 
     </div><!-- end #tabLocal -->
 
@@ -1467,6 +1511,72 @@ function showShipStepAlert(msg) {
     el.style.background = 'rgba(239,68,68,0.1)';
     el.style.color = '#dc2626';
     el.style.border = '1px solid rgba(239,68,68,0.3)';
+}
+
+function goToLocalStep(n) {
+    // Validate before advancing to step 3
+    if (n === 3) {
+        var name  = document.getElementById('custName');
+        var email = document.getElementById('custEmail');
+        var phone = document.getElementById('custPhone');
+        var alert2 = document.getElementById('localStep2Alert');
+        var valid = true;
+        [name, email, phone].forEach(function(f) { if (f) f.classList.remove('error-field'); });
+        if (!name || !name.value.trim())  { if (name) name.classList.add('error-field'); valid = false; }
+        if (!email || !email.value.trim() || !email.value.includes('@')) { if (email) email.classList.add('error-field'); valid = false; }
+        if (!phone || !phone.value.trim()) { if (phone) phone.classList.add('error-field'); valid = false; }
+        if (!valid) {
+            if (alert2) {
+                alert2.textContent = 'Please fill in all required fields.';
+                alert2.style.cssText = 'display:block;max-width:580px;margin:0 auto 18px;padding:13px 18px;border-radius:14px;font-size:13px;font-weight:600;background:rgba(234,179,8,0.1);color:#854d0e;border:1px solid rgba(234,179,8,0.3);';
+            }
+            return;
+        }
+        if (alert2) alert2.style.display = 'none';
+        // Populate step 3 order summary
+        var qty = cart.A + cart.B;
+        var s3 = document.getElementById('localStep3Lines');
+        if (s3) {
+            var html = '';
+            if (cart.A > 0) html += '<div class="cart-line"><div><p class="cart-line-name">Chocolate Chunk</p><p class="cart-line-detail">' + cart.A + ' cookie' + (cart.A > 1 ? 's' : '') + '</p></div><span class="cart-line-val">$' + cart.A + '.00</span></div>';
+            if (cart.B > 0) html += '<div class="cart-line"><div><p class="cart-line-name">Snickerdoodle</p><p class="cart-line-detail">' + cart.B + ' cookie' + (cart.B > 1 ? 's' : '') + '</p></div><span class="cart-line-val">$' + cart.B + '.00</span></div>';
+            html += '<div class="cart-total"><span>Total</span><span style="color:var(--hg)">$' + qty + '.00</span></div>';
+            s3.innerHTML = html;
+        }
+    }
+    // Show/hide steps
+    [1,2,3].forEach(function(i) {
+        var s = document.getElementById('localStep' + i);
+        if (s) s.style.display = (i === n) ? '' : 'none';
+    });
+    // Update step dots
+    for (var i = 1; i <= 3; i++) {
+        var dot = document.getElementById('localDot' + i);
+        if (!dot) continue;
+        dot.classList.remove('ship-dot-active', 'ship-dot-done');
+        if (i === n) dot.classList.add('ship-dot-active');
+        else if (i < n) dot.classList.add('ship-dot-done');
+    }
+    // Update connecting lines
+    [['12',1],['23',2]].forEach(function(pair) {
+        var line = document.getElementById('localLine' + pair[0]);
+        if (!line) return;
+        if (n > pair[1]) line.classList.add('ship-line-done');
+        else line.classList.remove('ship-line-done');
+    });
+    // Update label colors
+    [['2',2],['3',3]].forEach(function(pair) {
+        var lbl = document.getElementById('localLabel' + pair[0]);
+        if (!lbl) return;
+        lbl.style.color = (pair[1] === n) ? 'var(--hg)' : (pair[1] < n ? 'var(--hg-dark)' : 'var(--muted)');
+        lbl.style.fontWeight = (pair[1] === n) ? '700' : (pair[1] < n ? '600' : '400');
+    });
+    // Scroll to top of order area
+    var orderArea = document.getElementById('localOrderArea');
+    if (orderArea) {
+        var top = orderArea.getBoundingClientRect().top + window.scrollY - 70;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
 }
 
 function goToShipStep(n) {
@@ -2257,6 +2367,11 @@ function updateLocalBtns() {
         if (minus) minus.disabled = cart[f] === 0;
         if (plus)  plus.disabled  = (cart[f] + other >= MAX_ORDER) || (cart[f] >= (inventory[f] || 0));
     });
+    var cont = document.getElementById('localContinue1');
+    if (cont) {
+        cont.disabled = (totalQty === 0);
+        cont.style.opacity = (totalQty === 0) ? '0.45' : '1';
+    }
 }
 
 // ── CART ──────────────────────────────────────
@@ -2301,6 +2416,7 @@ function renderCart() {
 function updateStickyCart() {
     const qty = cart.A + cart.B;
     const el = document.getElementById('stickyCartCount');
+    if (!el) return;
     if (qty > 0) {
         el.textContent = ` · ${qty} cookies`;
         el.classList.add('has-items');
