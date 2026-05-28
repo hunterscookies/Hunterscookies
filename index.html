@@ -1269,15 +1269,18 @@
 <!-- Runs synchronously before first paint to avoid tab flash -->
 <script>
 (function(){
-  var t = 'local';
-  var panel = document.getElementById('tabLocal');
+  var valid  = ['local','ship','about','reviews','contact'];
+  var labels = {local:'Local Drops',ship:'Shipped Orders',about:'About',reviews:'Reviews',contact:'Contact'};
+  var hash   = location.hash.replace('#','');
+  var t      = valid.indexOf(hash) !== -1 ? hash : 'local';
+  var panel  = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
   if (panel) panel.classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(function(b){
     b.classList.remove('active');
-    if ((b.getAttribute('onclick')||'').indexOf("'local'") !== -1) b.classList.add('active');
+    if ((b.getAttribute('onclick')||'').indexOf("'"+t+"'") !== -1) b.classList.add('active');
   });
   var el = document.getElementById('activeTabLabel');
-  if (el) el.textContent = 'Local Drops';
+  if (el) el.textContent = labels[t] || 'Local Drops';
   window.__initTab = t;
 })();
 </script>
@@ -1296,7 +1299,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbzSUabhos7pKlFNkLbfFnLV_xcj4uduWtWXVNgXrF4M-vGHW8cifdQZH1y3OO7oiho/exec';
+const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbz-B57fpwMi-MjB8O9fwjvdFd-3PoWY7F0PyGLDFsCqfpZkme5XNdKcmfuGsiWnqP9J/exec';
 const STRIPE_KEY  = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL       = 30;
 const MAX_ORDER   = 6;
