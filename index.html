@@ -1169,44 +1169,57 @@
             </div>
         </div>
 
-        <!-- Order Inquiry Form -->
+        <!-- My Order Lookup -->
         <div id="contactFormOrder" class="card" style="display:none;padding:28px;margin-bottom:14px;">
-            <div style="display:flex;flex-direction:column;gap:14px;">
 
-                <div style="display:flex;gap:10px;">
-                    <div style="flex:1;">
-                        <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Your Name</label>
-                        <input id="oiName" type="text" placeholder="Full name" autocomplete="name"
-                            style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;">
-                    </div>
-                    <div style="flex:1;">
-                        <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Order Number</label>
-                        <input id="oiOrderNum" type="text" placeholder="HC-0042" autocomplete="off"
-                            style="width:100%;padding:11px 14px;border:1.5px solid var(--hg);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;letter-spacing:0.05em;">
-                    </div>
-                </div>
+            <!-- Step 1: order number input -->
+            <p style="font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:700;color:var(--hg-dark);margin:0 0 5px;">Look Up Your Order</p>
+            <p style="font-size:13px;color:var(--muted);margin:0 0 18px;line-height:1.5;">Enter your order number or the email you used to order.</p>
 
-                <div>
-                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Email</label>
-                    <input id="oiEmail" type="email" placeholder="your@email.com" autocomplete="email"
-                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;">
-                </div>
-
-                <div>
-                    <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">What can we help with?</label>
-                    <textarea id="oiMessage" placeholder="Write your question here..." rows="4"
-                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);box-sizing:border-box;resize:vertical;"></textarea>
-                </div>
-
-                <div id="oiAlert" style="display:none;padding:10px 14px;border-radius:10px;font-size:13px;background:#fef2f2;color:#991b1b;"></div>
-
-                <button id="oiSubmitBtn" onclick="submitOrderInquiry()"
-                    style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.02em;">
-                    Send to Hunter
+            <div style="display:flex;gap:8px;">
+                <input id="oiOrderNum" type="text" placeholder="HC-0042 or your@email.com" autocomplete="off"
+                    onkeydown="if(event.key==='Enter')lookupOrder()"
+                    style="flex:1;padding:13px 14px;border:2px solid var(--hg);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;font-weight:600;color:var(--hg-dark);background:var(--cream);box-sizing:border-box;">
+                <button id="oiLookupBtn" onclick="lookupOrder()"
+                    style="padding:13px 18px;background:var(--hg);color:var(--cream);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:0.02em;">
+                    Find Order
                 </button>
+            </div>
 
-                <div id="oiSuccess" style="display:none;text-align:center;padding:4px 0;">
-                    <p style="font-size:14px;font-weight:600;color:var(--hg-dark);margin:0;">Message sent. We'll be in touch shortly.</p>
+            <div id="oiLookupAlert" style="display:none;margin-top:12px;padding:10px 14px;border-radius:10px;font-size:13px;background:#fef2f2;color:#991b1b;"></div>
+
+            <!-- Step 2: summary + questions (hidden until order found) -->
+            <div id="oiSummary" style="display:none;">
+
+                <!-- Order summary -->
+                <div style="border-top:1.5px solid var(--border);margin-top:22px;padding-top:20px;">
+                    <p style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;">Your Order</p>
+                    <div id="oiSummaryContent" style="display:flex;flex-direction:column;gap:10px;"></div>
+                </div>
+
+                <!-- Have Questions? -->
+                <div style="border-top:1.5px solid var(--border);margin-top:24px;padding-top:22px;">
+                    <p style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--hg-dark);margin:0 0 4px;">Have Questions?</p>
+                    <p style="font-size:13px;color:var(--muted);margin:0 0 18px;line-height:1.5;">Reach out and we'll get back to you right away.</p>
+
+                    <a id="oiTextBtn" href="sms:+19253894406"
+                        style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:var(--hg);color:var(--cream);border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;margin-bottom:12px;letter-spacing:0.02em;">
+                        Text Hunter Now
+                    </a>
+
+                    <textarea id="oiMessage" placeholder="What can we help you with? We'll reply to your confirmation email." rows="3"
+                        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;resize:none;box-sizing:border-box;color:var(--hg-dark);background:var(--cream);"></textarea>
+
+                    <div id="oiMsgAlert" style="display:none;margin-top:10px;padding:10px 14px;border-radius:10px;font-size:13px;"></div>
+
+                    <button id="oiSubmitBtn" onclick="submitOrderInquiry()"
+                        style="width:100%;padding:14px;background:transparent;border:2px solid var(--hg);color:var(--hg-dark);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;letter-spacing:0.02em;">
+                        Send Message
+                    </button>
+
+                    <div id="oiSuccess" style="display:none;text-align:center;padding:10px 0 4px;">
+                        <p style="font-size:14px;font-weight:600;color:var(--hg-dark);margin:0;">Message sent — we'll be in touch shortly.</p>
+                    </div>
                 </div>
 
             </div>
@@ -1279,7 +1292,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────
-const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbxDwW6HytFyRtrhnDAUwpbGQyTwTSMnvmc6XcyrxcSsyB8PA1pMMxa4hiYMREKnxISX/exec';
+const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbz7orxOrdy1hGMfojMcK287e6BTUQ99mIzJQOgOz62sIR6x9Nhs47Z_20zlllq0T7as/exec';
 const STRIPE_KEY  = 'pk_live_51TbSkpADJ6jeerVFRVVEGEcXokyIfnaW4VKJqYyLDpSapQknHD269iJm8Y91S2LarbDOxtOnXJKg2nfj93RqJMrg00dvtDmjZb';
 const TOTAL       = 30;
 const MAX_ORDER   = 6;
@@ -2019,24 +2032,86 @@ function showContactForm(type) {
     document.getElementById('toggleOrder').style.cssText   = isOrder ? activeStyle   : inactiveStyle;
 }
 
-async function submitOrderInquiry() {
-    const name     = document.getElementById('oiName').value.trim();
-    const email    = document.getElementById('oiEmail').value.trim();
-    const orderNum = document.getElementById('oiOrderNum').value.trim().toUpperCase();
-    const message  = document.getElementById('oiMessage').value.trim();
-    const btn      = document.getElementById('oiSubmitBtn');
-    const alertEl  = document.getElementById('oiAlert');
+let _lookedUpOrder = null;
+
+async function lookupOrder() {
+    const raw     = document.getElementById('oiOrderNum').value.trim();
+    const alertEl = document.getElementById('oiLookupAlert');
+    const btn     = document.getElementById('oiLookupBtn');
     alertEl.style.display = 'none';
-    if (!name)    { alertEl.textContent = 'Please enter your name.'; alertEl.style.display = 'block'; return; }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alertEl.textContent = 'Please enter a valid email.'; alertEl.style.display = 'block'; return; }
-    if (!orderNum) { alertEl.textContent = 'Please enter your order number from your confirmation email.'; alertEl.style.display = 'block'; return; }
-    if (!message)  { alertEl.textContent = 'Please write a message.'; alertEl.style.display = 'block'; return; }
-    btn.disabled = true; btn.textContent = 'Sending...';
+
+    if (!raw) {
+        alertEl.textContent = 'Please enter your order number or email address.';
+        alertEl.style.display = 'block'; return;
+    }
+
+    const isEmail   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw);
+    const isOrderNum = /^(HC|SH)-\d+$/i.test(raw);
+
+    if (!isEmail && !isOrderNum) {
+        alertEl.textContent = 'Enter an order number (HC-0042) or the email you ordered with.';
+        alertEl.style.display = 'block'; return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Looking up…';
     try {
-        const res = await fetch(SHEET_URL, {
+        const param = isEmail
+            ? 'type=getOrder&email=' + encodeURIComponent(raw)
+            : 'type=getOrder&order_number=' + encodeURIComponent(raw.toUpperCase());
+        const res  = await fetch(SHEET_URL + '?' + param);
+        const data = await res.json();
+        if (!data.success) {
+            alertEl.textContent = data.error || 'Order not found. Double-check and try again.';
+            alertEl.style.display = 'block';
+        } else {
+            _lookedUpOrder = data.order;
+            renderOrderSummary(data.order);
+            document.getElementById('oiSummary').style.display = 'block';
+            const textBtn = document.getElementById('oiTextBtn');
+            if (textBtn) textBtn.href = 'sms:+19253894406?body=Hi Hunter! Question about order ' + data.order.order_number + '.';
+        }
+    } catch(e) {
+        alertEl.textContent = 'Network error. Please try again.';
+        alertEl.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Find Order';
+}
+
+function renderOrderSummary(order) {
+    const r = (lbl, val) => val
+        ? '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">'
+        + '<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;padding-top:1px;">' + lbl + '</span>'
+        + '<span style="font-size:14px;font-weight:600;color:var(--hg-dark);text-align:right;">' + val + '</span></div>'
+        : '';
+    document.getElementById('oiSummaryContent').innerHTML = [
+        r('Order #', order.order_number),
+        r('Name',    order.name),
+        r('Date',    order.date),
+        r('Type',    order.type),
+        r('Items',   order.items),
+        r('Total',   order.total),
+        r('Status',  order.status || 'Confirmed'),
+    ].join('');
+}
+
+async function submitOrderInquiry() {
+    const message  = document.getElementById('oiMessage').value.trim();
+    const alertEl  = document.getElementById('oiMsgAlert');
+    const btn      = document.getElementById('oiSubmitBtn');
+    const orderNum = (_lookedUpOrder && _lookedUpOrder.order_number) || document.getElementById('oiOrderNum').value.trim().toUpperCase();
+    alertEl.style.display = 'none';
+    if (!message) {
+        alertEl.textContent = 'Please write a message before sending.';
+        alertEl.style.background = '#fef2f2'; alertEl.style.color = '#991b1b';
+        alertEl.style.display = 'block'; return;
+    }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+        const name = (_lookedUpOrder && _lookedUpOrder.name) || '';
+        const res  = await fetch(SHEET_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ type: 'contact', name, email, phone: '', inquiry_type: 'My Order', source: 'Order Inquiry', message, order_number: orderNum })
+            body: JSON.stringify({ type: 'contact', name, email: '', phone: '', inquiry_type: 'My Order', source: 'Order Inquiry', message, order_number: orderNum })
         });
         const result = await res.json();
         if (result && result.success) {
@@ -2044,15 +2119,18 @@ async function submitOrderInquiry() {
             document.getElementById('oiSuccess').style.display = 'block';
         } else {
             alertEl.textContent = (result && result.error) || 'Something went wrong. Please try again.';
+            alertEl.style.background = '#fef2f2'; alertEl.style.color = '#991b1b';
             alertEl.style.display = 'block';
-            btn.disabled = false; btn.textContent = 'Send to Hunter';
+            btn.disabled = false; btn.textContent = 'Send Message';
         }
     } catch(e) {
         alertEl.textContent = 'Network error. Please try again.';
+        alertEl.style.background = '#fef2f2'; alertEl.style.color = '#991b1b';
         alertEl.style.display = 'block';
-        btn.disabled = false; btn.textContent = 'Send to Hunter';
+        btn.disabled = false; btn.textContent = 'Send Message';
     }
 }
+
 
 async function submitContactForm() {
     const name       = document.getElementById('contactName').value.trim();
