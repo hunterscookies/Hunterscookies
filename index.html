@@ -510,6 +510,7 @@
     }
 </style>
 <script src="https://js.stripe.com/v3/"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBrZsLvrlP9WZ02o0GdtYr9xLrKNNnPIYg&libraries=places&callback=initGooglePlaces" async defer></script>
 </head>
 <body>
 
@@ -1093,9 +1094,8 @@
             <p style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--hg-dark);margin-bottom:16px;">Shipping Address</p>
             <div style="display:flex;flex-direction:column;gap:12px;">
                 <div style="position:relative;">
-                    <input id="shipAddr1" type="text" placeholder="Street address" autocomplete="off" oninput="onShipAddr1Input()"
+                    <input id="shipAddr1" type="text" placeholder="Street address" autocomplete="off" oninput="onShipAddressChange()"
                         style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;box-sizing:border-box;">
-                    <div id="addrSuggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;z-index:200;max-height:220px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.08);"></div>
                 </div>
                 <input id="shipAddr2" type="text" placeholder="Apt, suite, unit (optional)" autocomplete="address-line2"
                     style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none;">
@@ -1901,59 +1901,33 @@ function applyShipDiscount() {
 }
 
 // ── ADDRESS AUTOCOMPLETE (Nominatim) ─────────────────────
-let addrTimer = null;
-function onShipAddr1Input() {
-    onShipAddressChange();
-    clearTimeout(addrTimer);
-    const val = document.getElementById('shipAddr1').value.trim();
-    const box = document.getElementById('addrSuggestions');
-    if (val.length < 3) { box.style.display = 'none'; return; }
-    addrTimer = setTimeout(() => fetchAddrSuggestions(val), 150);
-}
-
-async function fetchAddrSuggestions(query) {
-    const box = document.getElementById('addrSuggestions');
-    try {
-        // Photon (komoot) — fast, no API key, California bounding box
-        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lang=en&bbox=-124.4096,32.5343,-114.1308,42.0095`;
-        const data = await fetch(url).then(r => r.json());
-        const features = (data.features || []).filter(f => {
-            const p = f.properties;
-            return p.state === 'California' && (p.housenumber || p.street) && (p.city || p.town || p.village);
+function initGooglePlaces() {
+    const input = document.getElementById('shipAddr1');
+    if (!input || !window.google) return;
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ['address'],
+        componentRestrictions: { country: 'us' },
+        fields: ['address_components']
+    });
+    autocomplete.addListener('place_changed', function() {
+        const place = autocomplete.getPlace();
+        if (!place.address_components) return;
+        let streetNum = '', route = '', city = '', state = '', zip = '';
+        place.address_components.forEach(function(c) {
+            if (c.types.includes('street_number'))               streetNum = c.long_name;
+            if (c.types.includes('route'))                       route     = c.long_name;
+            if (c.types.includes('locality'))                    city      = c.long_name;
+            if (c.types.includes('administrative_area_level_1')) state     = c.short_name;
+            if (c.types.includes('postal_code'))                 zip       = c.long_name;
         });
-        if (!features.length) { box.style.display = 'none'; return; }
-        box.innerHTML = features.map(f => {
-            const p = f.properties;
-            const street = [p.housenumber, p.street || p.name].filter(Boolean).join(' ');
-            const city   = p.city || p.town || p.village || '';
-            const zip    = p.postcode || '';
-            if (!street || !city) return '';
-            return `<div class="addr-suggestion" onclick="fillAddress('${street.replace(/'/g,"\\'")}','${city.replace(/'/g,"\\'")}','CA','${zip}')"
-                style="padding:10px 14px;font-size:13px;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border);line-height:1.4;">
-                <strong>${street}</strong><br><span style="color:var(--muted);font-size:12px;">${city}, CA ${zip}</span>
-            </div>`;
-        }).filter(Boolean).join('');
-        if (box.innerHTML) box.style.display = 'block'; else box.style.display = 'none';
-    } catch(e) { box.style.display = 'none'; }
+        document.getElementById('shipAddr1').value = [streetNum, route].filter(Boolean).join(' ');
+        document.getElementById('shipCity').value  = city;
+        document.getElementById('shipState').value = state;
+        document.getElementById('shipZip').value   = zip;
+        onShipAddressChange();
+        updateShipDeliverySummary();
+    });
 }
-
-function fillAddress(street, city, state, zip) {
-    document.getElementById('shipAddr1').value  = street;
-    document.getElementById('shipCity').value   = city;
-    document.getElementById('shipState').value  = state;
-    document.getElementById('shipZip').value    = zip;
-    document.getElementById('addrSuggestions').style.display = 'none';
-    onShipAddressChange();
-    updateShipDeliverySummary();
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', e => {
-    if (!e.target.closest('#shipAddr1') && !e.target.closest('#addrSuggestions')) {
-        const box = document.getElementById('addrSuggestions');
-        if (box) box.style.display = 'none';
-    }
-});
 
 function selectShipRate(rate) {
     selectedShipRate = rate;
