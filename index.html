@@ -1907,22 +1907,26 @@ function onShipAddr1Input() {
     clearTimeout(addrTimer);
     const val = document.getElementById('shipAddr1').value.trim();
     const box = document.getElementById('addrSuggestions');
-    if (val.length < 4) { box.style.display = 'none'; return; }
-    addrTimer = setTimeout(() => fetchAddrSuggestions(val), 500);
+    if (val.length < 3) { box.style.display = 'none'; return; }
+    addrTimer = setTimeout(() => fetchAddrSuggestions(val), 150);
 }
 
 async function fetchAddrSuggestions(query) {
     const box = document.getElementById('addrSuggestions');
     try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=us&q=${encodeURIComponent(query)}`;
-        const results = await fetch(url, { headers: { 'Accept-Language': 'en' } }).then(r => r.json());
-        const caResults = results.filter(r => r.address && r.address.state === 'California');
-        if (!caResults.length) { box.style.display = 'none'; return; }
-        box.innerHTML = caResults.map(r => {
-            const addr = r.address;
-            const street = [addr.house_number, addr.road].filter(Boolean).join(' ');
-            const city   = addr.city || addr.town || addr.village || addr.hamlet || '';
-            const zip    = addr.postcode || '';
+        // Photon (komoot) — fast, no API key, California bounding box
+        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lang=en&bbox=-124.4096,32.5343,-114.1308,42.0095`;
+        const data = await fetch(url).then(r => r.json());
+        const features = (data.features || []).filter(f => {
+            const p = f.properties;
+            return p.state === 'California' && (p.housenumber || p.street) && (p.city || p.town || p.village);
+        });
+        if (!features.length) { box.style.display = 'none'; return; }
+        box.innerHTML = features.map(f => {
+            const p = f.properties;
+            const street = [p.housenumber, p.street || p.name].filter(Boolean).join(' ');
+            const city   = p.city || p.town || p.village || '';
+            const zip    = p.postcode || '';
             if (!street || !city) return '';
             return `<div class="addr-suggestion" onclick="fillAddress('${street.replace(/'/g,"\\'")}','${city.replace(/'/g,"\\'")}','CA','${zip}')"
                 style="padding:10px 14px;font-size:13px;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border);line-height:1.4;">
