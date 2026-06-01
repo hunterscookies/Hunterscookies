@@ -675,12 +675,6 @@
     </div>
 
     <!-- ── ORDER ── -->
-    <div style="max-width:880px;margin:0 auto 16px">
-        <div style="background:rgba(27,77,62,0.06);border:1px solid rgba(27,77,62,0.12);border-radius:16px;padding:12px 18px;display:flex;align-items:center;gap:10px">
-            <span style="font-size:1.1rem;flex-shrink:0">🎟️</span>
-            <p style="font-size:12px;color:var(--hg-dark);line-height:1.5"><strong>Founder's Drop only:</strong> Limited to <strong>6 cookies per customer</strong> at the $1 introductory price. Future drops will be priced at $4.50 per cookie with no limit, as long as not sold out.</p>
-        </div>
-    </div>
     <div id="localOrderArea">
 
         <!-- Step progress -->
@@ -2528,11 +2522,6 @@ function localAdj(flavor, dir) {
 
     if (next < 0) return;
     if (next > (inventory[flavor] || 0)) return;
-    if (next + others > MAX_ORDER) {
-        showToast('Max ' + MAX_ORDER + ' cookies per drop. You already have ' + others + ' from other flavors.', 'warn');
-        return;
-    }
-
     cart[flavor] = next;
 
     var qtyEl = document.getElementById('localQty' + flavor);
@@ -2550,7 +2539,7 @@ function updateLocalBtns() {
         var plus  = document.getElementById('localBtn' + f + '_plus');
         var others = Object.keys(cart).filter(function(k){return k!==f;}).reduce(function(s,k){return s+cart[k];},0);
         if (minus) minus.disabled = cart[f] === 0;
-        if (plus)  plus.disabled  = (cart[f] + others >= MAX_ORDER) || (cart[f] >= (inventory[f] || 0));
+        if (plus)  plus.disabled  = (cart[f] >= (inventory[f] || 0));
     });
     var cont = document.getElementById('localContinue1');
     if (cont && new Date() < DROP_OPEN) {
