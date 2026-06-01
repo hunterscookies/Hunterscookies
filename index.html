@@ -799,6 +799,37 @@
             </div>
 
 
+            <!-- ── PREVIEW CART SUMMARY ── -->
+            <div id="previewCartBox" style="display:none;margin-top:20px;background:#fff;border:1.5px solid rgba(27,77,62,0.15);border-radius:16px;padding:18px 20px;">
+
+                <!-- Cart lines -->
+                <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--hg-dark);margin-bottom:10px">Your Order</p>
+                <div id="previewCartLines"></div>
+                <div id="previewCartTotal" style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--hg-dark);border-top:1px solid var(--border);margin-top:10px;padding-top:10px;">
+                    <span>Total</span><span id="previewCartTotalAmt"></span>
+                </div>
+
+                <!-- Divider -->
+                <div style="border-top:1px solid var(--border);margin:14px 0 12px;"></div>
+
+                <!-- Ordering window -->
+                <p style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Ordering Window</p>
+                <p style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:12px">
+                    <strong>Opens: Tuesday June 2 · 8:00 PM</strong><br>
+                    <strong>Closes: Thursday June 11 · 8:00 PM</strong><br>
+                    <span style="font-size:11px;color:var(--muted)">Or until sold out — whichever comes first.</span>
+                </p>
+
+                <!-- Pickup & Delivery -->
+                <p style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Pickup & Delivery — Saturday, June 13</p>
+                <p style="font-size:12px;color:var(--text);line-height:1.7">
+                    <strong>Pickup &nbsp;&nbsp;10:00 AM – 2:00 PM</strong><br>
+                    <strong>Delivery &nbsp;4:00 PM – 8:00 PM</strong><br>
+                    <span style="font-size:11px;color:var(--muted)">Location sent in confirmation email · Danville, CA</span>
+                </p>
+            </div>
+
+
             <button id="localContinue1" onclick="goToLocalStep(2)" disabled
                 style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;opacity:0.45;margin-top:16px;letter-spacing:0.01em;transition:opacity 0.2s;">
                 Continue
@@ -1731,7 +1762,7 @@ function goToLocalStep(n) {
         }
         if (alert2) alert2.style.display = 'none';
         // Populate step 3 order summary
-        var qty = cart.A + cart.B + cart.C + cart.C;
+        var qty = cart.A + cart.B + cart.C;
         var s3 = document.getElementById('localStep3Lines');
         if (s3) {
             var html = '';
@@ -2543,7 +2574,7 @@ function localAdj(flavor, dir) {
 }
 
 function updateLocalBtns() {
-    var totalQty = cart.A + cart.B + cart.C + cart.C;
+    var totalQty = cart.A + cart.B + cart.C;
     ['A','B','C'].forEach(function(f) {
         var minus = document.getElementById('localBtn' + f + '_minus');
         var plus  = document.getElementById('localBtn' + f + '_plus');
@@ -2567,7 +2598,23 @@ function updateLocalBtns() {
 function renderCart() {
     const lines = document.getElementById('cartLines');
     const total = document.getElementById('cartTotal');
-    const qty   = cart.A + cart.B + cart.C + cart.C;
+    const qty   = cart.A + cart.B + cart.C;
+
+    // Update preview cart box
+    const previewBox   = document.getElementById('previewCartBox');
+    const previewLines = document.getElementById('previewCartLines');
+    const previewAmt   = document.getElementById('previewCartTotalAmt');
+    if (previewBox) {
+        previewBox.style.display = qty > 0 ? 'block' : 'none';
+        if (previewLines) {
+            var ph = '';
+            if (cart.A > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Chocolate Chunk <span style='color:var(--muted)'>×${cart.A}</span></span><span>$${ (cart.A*4.5).toFixed(2) }</span></div>`;
+            if (cart.B > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Snickerdoodle <span style='color:var(--muted)'>×${cart.B}</span></span><span>$${ (cart.B*4.5).toFixed(2) }</span></div>`;
+            if (cart.C > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Peanut Butter Cookie <span style='color:var(--muted)'>×${cart.C}</span></span><span>$${ (cart.C*4.5).toFixed(2) }</span></div>`;
+            previewLines.innerHTML = ph;
+        }
+        if (previewAmt) previewAmt.textContent = `$${ (qty * 4.5).toFixed(2) }`;
+    }
 
     if (qty === 0) {
         lines.innerHTML = '';
@@ -2600,7 +2647,7 @@ function renderCart() {
     }
     html += `<p style="font-size:11px;color:var(--muted);padding:8px 2px 0">${qty} cookie${qty>1?'s':''} total</p>`;
     lines.innerHTML = html;
-    total.textContent = `${qty} cookie${qty>1?'s':''} — $${qty}.00`;
+    total.textContent = `${qty} cookie${qty>1?'s':''} — $${ (qty * 4.5).toFixed(2) }`;
     setTimeout(() => updateApplePayAmount(qty), 0);
 }
 
