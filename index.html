@@ -558,7 +558,7 @@
     </div>
     <p style="font-size:12px;color:rgba(255,253,208,0.5);line-height:1.6;margin-bottom:10px">Tuesday, June 2 at 8:00 PM</p>
     <!-- DROP INFO CARD -->
-    <p style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:rgba(255,253,208,0.95);max-width:340px;width:100%;text-align:left;margin-bottom:6px">Drop Info</p>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:rgba(255,253,208,0.95);max-width:340px;width:100%;text-align:center;margin-bottom:6px">Drop Info</p>
     <div style="max-width:340px;width:100%;background:rgba(255,253,208,0.04);border:1px solid rgba(255,253,208,0.1);border-radius:16px;padding:14px 18px;text-align:left">
         <p style="font-size:12px;font-weight:800;letter-spacing:0.1em;color:#fbbf24;margin-bottom:14px">$4.50 / COOKIE</p>
 
@@ -746,7 +746,6 @@
                     </div>
                     <div style="flex:1;min-width:0">
                         <span class="cookie-name">Snickerdoodle</span>
-                        <span class="tag tag-rotation" style="margin-left:8px;vertical-align:middle">Weekly Rotation</span>
                         <p class="cookie-desc" style="margin-top:6px">Pillowy soft centers rolled generously in premium cinnamon sugar.</p>
                         <div>
                             <span class="tag tag-free">$4.50 / Cookie</span>
@@ -764,6 +763,37 @@
                         style="width:32px;height:32px;border-radius:50%;border:none;background:var(--hg);color:var(--cream);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
                 </div>
             </div>
+
+            <!-- Peanut Butter Cookie -->
+            <div class="card card-hover cookie-card" style="position:relative;overflow:hidden;">
+                <div id="soldOutOverlayC" style="display:none;position:absolute;inset:0;background:rgba(180,30,30,0.7);border-radius:inherit;align-items:center;justify-content:center;z-index:2;display:none">
+                    <p style="color:#fff;font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;letter-spacing:0.04em">Sold Out</p>
+                </div>
+                <div class="cookie-top">
+                    <div class="cookie-emoji" style="overflow:hidden;padding:0;border-radius:18px;background:#c8934a;display:flex;align-items:center;justify-content:center;font-size:3rem;min-width:80px;height:80px;">
+                        🥜
+                    </div>
+                    <div style="flex:1;min-width:0">
+                        <span class="cookie-name">Peanut Butter Cookie</span>
+                        <span class="tag tag-rotation" style="margin-left:8px;vertical-align:middle">Weekly Rotation</span>
+                        <p class="cookie-desc" style="margin-top:6px">Rich, creamy peanut butter baked into a soft, golden cookie with a perfectly crisp edge.</p>
+                        <div>
+                            <span class="tag tag-free">$4.50 / Cookie</span>
+                            <span id="soldOutC" class="tag tag-sold">Sold Out</span>
+                            <span id="lowQtyC" class="tag tag-low">Low Quantity</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="chips-label" style="margin-top:14px;">Quantity</p>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+                    <button id="localBtnC_minus" onclick="localAdj('C',-1)"
+                        style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--hg);background:transparent;color:var(--hg);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;" disabled>−</button>
+                    <span id="localQtyC" style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--hg-dark);min-width:24px;text-align:center;">0</span>
+                    <button id="localBtnC_plus" onclick="localAdj('C',1)"
+                        style="width:32px;height:32px;border-radius:50%;border:none;background:var(--hg);color:var(--cream);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+                </div>
+            </div>
+
 
             <button id="localContinue1" onclick="goToLocalStep(2)" disabled
                 style="width:100%;padding:15px;background:var(--hg);color:var(--cream);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;opacity:0.45;margin-top:16px;letter-spacing:0.01em;transition:opacity 0.2s;">
@@ -1460,9 +1490,9 @@ let stripeCard           = null;
 let stripePaymentRequest = null;
 let discountApplied      = false;
 let isPeeking            = false;
-let inventory  = { A: TOTAL, B: TOTAL };
+let inventory  = { A: TOTAL, B: TOTAL, C: TOTAL };
 let usedEmails = new Set();
-let cart = { A: 0, B: 0 };
+let cart = { A: 0, B: 0, C: 0 };
 
 // ── LOCK OVERLAY ──────────────────────────────
     function checkLock() {
@@ -1499,10 +1529,14 @@ function tick() {
     if (diff > 0) {
         // Drop not yet open — lock the ordering area
         if (orderArea) { orderArea.style.opacity='0.45'; orderArea.style.pointerEvents='none'; }
+        const cont1 = document.getElementById('localContinue1');
+        if (cont1) { cont1.disabled=true; cont1.textContent='Opens June 2 at 8:00 PM'; cont1.style.opacity='0.45'; }
         if (cardBtn)   { cardBtn.disabled=true; cardBtn.textContent='Orders Open Tuesday at 8:00 PM'; cardBtn.style.opacity='0.6'; }
         if (freeBtn)   { freeBtn.disabled=true; freeBtn.textContent='Orders Open Tuesday at 8:00 PM'; }
     } else if (orderArea) {
         orderArea.style.opacity=''; orderArea.style.pointerEvents='';
+        const cont1b = document.getElementById('localContinue1');
+        if (cont1b && cont1b.textContent==='Opens June 2 at 8:00 PM') { cont1b.textContent='Continue'; cont1b.style.opacity=''; }
         if (cardBtn && cardBtn.textContent==='Orders Open Tuesday at 8:00 PM') { cardBtn.textContent='Confirm Order'; cardBtn.style.opacity=''; }
         if (freeBtn && freeBtn.textContent==='Orders Open Tuesday at 8:00 PM') { freeBtn.textContent='Place Order'; }
     }
@@ -1693,12 +1727,13 @@ function goToLocalStep(n) {
         }
         if (alert2) alert2.style.display = 'none';
         // Populate step 3 order summary
-        var qty = cart.A + cart.B;
+        var qty = cart.A + cart.B + cart.C + cart.C;
         var s3 = document.getElementById('localStep3Lines');
         if (s3) {
             var html = '';
             if (cart.A > 0) html += '<div class="cart-line"><div><p class="cart-line-name">Chocolate Chunk</p><p class="cart-line-detail">' + cart.A + ' cookie' + (cart.A > 1 ? 's' : '') + '</p></div><span class="cart-line-val">$' + cart.A + '.00</span></div>';
             if (cart.B > 0) html += '<div class="cart-line"><div><p class="cart-line-name">Snickerdoodle</p><p class="cart-line-detail">' + cart.B + ' cookie' + (cart.B > 1 ? 's' : '') + '</p></div><span class="cart-line-val">$' + cart.B + '.00</span></div>';
+            if (cart.C > 0) html += '<div class="cart-line"><div><p class="cart-line-name">Peanut Butter Cookie</p><p class="cart-line-detail">' + cart.C + ' cookie' + (cart.C>1?'s':'') + '</p></div><span class="cart-line-val">$4.50 / cookie</span></div>';
             html += '<div class="cart-total"><span>Total</span><span style="color:var(--hg)">$' + qty + '.00</span></div>';
             s3.innerHTML = html;
         }
@@ -2489,12 +2524,12 @@ function scrollToOrder() {
 function localAdj(flavor, dir) {
     var current = cart[flavor];
     var next    = current + dir * 3;
-    var other   = flavor === 'A' ? cart.B : cart.A;
+    var others  = Object.keys(cart).filter(function(k){return k!==flavor;}).reduce(function(s,k){return s+cart[k];},0);
 
     if (next < 0) return;
     if (next > (inventory[flavor] || 0)) return;
-    if (next + other > MAX_ORDER) {
-        showToast('Max ' + MAX_ORDER + ' cookies per drop. You already have ' + other + ' from the other flavor.', 'warn');
+    if (next + others > MAX_ORDER) {
+        showToast('Max ' + MAX_ORDER + ' cookies per drop. You already have ' + others + ' from other flavors.', 'warn');
         return;
     }
 
@@ -2509,17 +2544,22 @@ function localAdj(flavor, dir) {
 }
 
 function updateLocalBtns() {
-    var totalQty = cart.A + cart.B;
-    ['A','B'].forEach(function(f) {
+    var totalQty = cart.A + cart.B + cart.C + cart.C;
+    ['A','B','C'].forEach(function(f) {
         var minus = document.getElementById('localBtn' + f + '_minus');
         var plus  = document.getElementById('localBtn' + f + '_plus');
-        var other = f === 'A' ? cart.B : cart.A;
+        var others = Object.keys(cart).filter(function(k){return k!==f;}).reduce(function(s,k){return s+cart[k];},0);
         if (minus) minus.disabled = cart[f] === 0;
-        if (plus)  plus.disabled  = (cart[f] + other >= MAX_ORDER) || (cart[f] >= (inventory[f] || 0));
+        if (plus)  plus.disabled  = (cart[f] + others >= MAX_ORDER) || (cart[f] >= (inventory[f] || 0));
     });
     var cont = document.getElementById('localContinue1');
-    if (cont) {
+    if (cont && new Date() < DROP_OPEN) {
+        cont.disabled = true;
+        cont.textContent = 'Opens June 2 at 8:00 PM';
+        cont.style.opacity = '0.45';
+    } else if (cont) {
         cont.disabled = (totalQty === 0);
+        cont.textContent = 'Continue';
         cont.style.opacity = (totalQty === 0) ? '0.45' : '1';
     }
 }
@@ -2528,7 +2568,7 @@ function updateLocalBtns() {
 function renderCart() {
     const lines = document.getElementById('cartLines');
     const total = document.getElementById('cartTotal');
-    const qty   = cart.A + cart.B;
+    const qty   = cart.A + cart.B + cart.C + cart.C;
 
     if (qty === 0) {
         lines.innerHTML = '';
@@ -2556,6 +2596,9 @@ function renderCart() {
             <span class="cart-line-val">$4.50 / cookie</span>
         </div>`;
     }
+    if (cart.C > 0) {
+        lines.innerHTML += `<div class="cart-line"><div><p class="cart-line-name">Peanut Butter Cookie</p><p class="cart-line-detail">${cart.C} cookie${cart.C>1?'s':''}</p></div><span class="cart-line-val">$4.50 / cookie</span></div>`;
+    }
     html += `<p style="font-size:11px;color:var(--muted);padding:8px 2px 0">${qty} cookie${qty>1?'s':''} total</p>`;
     lines.innerHTML = html;
     total.textContent = `${qty} cookie${qty>1?'s':''} — $${qty}.00`;
@@ -2564,7 +2607,7 @@ function renderCart() {
 
 
 function updateStickyCart() {
-    const qty = cart.A + cart.B;
+    const qty = cart.A + cart.B + cart.C;
     const el = document.getElementById('stickyCartCount');
     if (!el) return;
     if (qty > 0) {
@@ -2663,7 +2706,7 @@ function applyDiscount() {
         document.getElementById('applePayContainer').style.display = 'none';
         document.getElementById('cardContainer').style.display = 'none';
         document.getElementById('freeOrderContainer').style.display = 'block';
-        document.getElementById('freeOrderBtn').disabled = (cart.A + cart.B) === 0;
+        document.getElementById('freeOrderBtn').disabled = (cart.A + cart.B + cart.C) === 0;
     } else {
         discountApplied = false;
         msg.textContent = 'Invalid code.';
@@ -2674,7 +2717,7 @@ function applyDiscount() {
 async function handleFreeOrderClick() {
     if (isPeeking) return;
     if (!validateOrderForm()) return;
-    if (cart.A + cart.B === 0) { showInlineAlert('Please select at least one cookie.', 'warn'); return; }
+    if (cart.A + cart.B + cart.C === 0) { showInlineAlert('Please select at least one cookie.', 'warn'); return; }
     const btn = document.getElementById('freeOrderBtn');
     btn.disabled = true; btn.textContent = 'Placing order...';
     const success = await processStripePayment(null);
@@ -2700,7 +2743,7 @@ function updateApplePayAmount(qty) {
 async function handleCardPayClick() {
     if (isPeeking) return;
     if (!validateOrderForm()) return;
-    const qty = cart.A + cart.B;
+    const qty = cart.A + cart.B + cart.C;
     if (qty === 0) { showInlineAlert('Please select at least one cookie.', 'warn'); return; }
     const btn = document.getElementById('cardPayBtn');
     btn.disabled = true; btn.textContent = 'Processing...';
@@ -2722,7 +2765,7 @@ function validateOrderForm() {
     const name  = document.getElementById('custName');
     const email = document.getElementById('custEmail');
     const phone = document.getElementById('custPhone');
-    const qty   = cart.A + cart.B;
+    const qty   = cart.A + cart.B + cart.C;
     [name, email, phone].forEach(f => f.classList.remove('error-field'));
     if (qty === 0) { showInlineAlert('Please select at least one cookie.', 'warn'); return false; }
     let valid = true;
@@ -2746,12 +2789,12 @@ async function processStripePayment(paymentMethodId) {
     const email  = document.getElementById('custEmail').value.trim().toLowerCase();
     const phone  = document.getElementById('custPhone').value.trim();
     const pickup = document.getElementById('pickupWindow').value;
-    const qty    = cart.A + cart.B;
+    const qty    = cart.A + cart.B + cart.C;
     const payload = {
         payment_method_id: paymentMethodId,
         discount_code: discountApplied ? DISCOUNT_CODE : null,
         name, email, phone, pickup,
-        qty_a: cart.A, qty_b: cart.B,
+        qty_a: cart.A, qty_b: cart.B, qty_c: cart.C,
         total_cookies: qty, amount_cents: discountApplied ? 0 : qty * 450,
         timestamp: new Date().toISOString()
     };
@@ -2769,11 +2812,12 @@ async function processStripePayment(paymentMethodId) {
         showInlineAlert(res.message || 'Payment failed. Please try again.', 'error'); return false;
     }
     // Success
-    inventory.A -= cart.A; inventory.B -= cart.B;
+    inventory.A -= cart.A; inventory.B -= cart.B; inventory.C -= cart.C;
     usedEmails.add(email); hideInlineAlert();
     const parts = [];
     if (cart.A > 0) parts.push(`${cart.A}x Chocolate Chunk`);
     if (cart.B > 0) parts.push(`${cart.B}x Snickerdoodle`);
+    if (cart.C > 0) parts.push(`${cart.C}x Peanut Butter Cookie`);
     const firstName = name.split(' ')[0];
     const orderNum = res.order_number || '';
     const priceStr = discountApplied ? 'Complimentary' : '$' + (qty * 4.5).toFixed(2);
@@ -2811,6 +2855,7 @@ function syncInventory() {
             if (!data.success) return;
             inventory.A = data.remaining_a ?? TOTAL;
             inventory.B = data.remaining_b ?? TOTAL;
+            inventory.C = data.remaining_c ?? TOTAL;
             if (data.used_emails) data.used_emails.forEach(e => usedEmails.add(e));
             ['A','B'].forEach(f => {
                 const el = document.getElementById('soldOut'+f);
