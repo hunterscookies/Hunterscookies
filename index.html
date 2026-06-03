@@ -2442,18 +2442,22 @@ async function submitOrderInquiry() {
     }
     btn.disabled = true; btn.textContent = 'Sending…';
     try {
+    try {
         const name = (_lookedUpOrder && _lookedUpOrder.name) || '';
-        const res  = await fetch(SHEET_URL, {
+        const res  = await fetch('https://formsubmit.co/ajax/gurnarihunter@gmail.com', {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ type: 'contact', name, email: '', phone: '', inquiry_type: 'My Order', source: 'Order Inquiry', message, order_number: orderNum })
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                _subject: "Order Inquiry — Hunter's Cookies",
+                'Customer Name': name, 'Order Number': orderNum, Message: message
+            })
         });
         const result = await res.json();
         if (result && result.success) {
             btn.style.display = 'none';
             document.getElementById('oiSuccess').style.display = 'block';
         } else {
-            alertEl.textContent = (result && result.error) || 'Something went wrong. Please try again.';
+            alertEl.textContent = 'Something went wrong. Please try again.';
             alertEl.style.background = '#fef2f2'; alertEl.style.color = '#991b1b';
             alertEl.style.display = 'block';
             btn.disabled = false; btn.textContent = 'Send Message';
@@ -2486,10 +2490,15 @@ async function submitContactForm() {
     if (!message) { showContactAlert('Please write a message.', 'error'); return; }
     btn.disabled = true; btn.textContent = 'Sending…';
     try {
-        const res = await fetch(SHEET_URL, {
+        const res = await fetch('https://formsubmit.co/ajax/gurnarihunter@gmail.com', {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ type: 'contact', name, email, phone, inquiry_type: type, source, message, order_number: orderNum || null })
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                _subject: "New Contact — Hunter's Cookies",
+                Name: name, Email: email, Phone: phone,
+                'Inquiry Type': type, 'How They Found Us': source,
+                'Order Number': orderNum || 'N/A', Message: message
+            })
         });
         const result = await res.json();
         if (result && result.success) {
@@ -2497,7 +2506,7 @@ async function submitContactForm() {
             document.querySelector('#tabContact .card').style.display = 'none';
             document.getElementById('contactSuccess').style.display = 'block';
         } else {
-            showContactAlert((result && result.error) || 'Something went wrong. Please try again.', 'error');
+            showContactAlert('Something went wrong. Please try again.', 'error');
             btn.disabled = false; btn.textContent = 'Send Message';
         }
     } catch(e) {
