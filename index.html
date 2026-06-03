@@ -1580,11 +1580,10 @@ function tick() {
         if (freeBtn && freeBtn.textContent==='Orders Open Tuesday at 8:00 PM') { freeBtn.textContent='Place Order'; }
     }
     if (diff <= 0 && now < ORDER_CLOSE) {
-        lbl.innerHTML = '<span style="color:#a3e0b0;font-size:1.6rem;font-weight:800;letter-spacing:0.04em;text-transform:none;line-height:1.2;display:block">● Drop Is Live — Order Now!</span>';
+        lbl.innerHTML = '<span style="color:#a3e0b0;font-size:1.6rem;font-weight:800;letter-spacing:0.04em;text-transform:none;line-height:1.2;display:block">&#9679; Drop Is Live &#8212; Order Now!</span>';
         set('00','00','00','00');
-        sub.innerHTML = '<span style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.3rem,4vw,1.9rem);font-weight:700;color:rgba(255,253,208,0.75);letter-spacing:-0.01em;">↓ Order Below ↓</span>';
+        sub.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.3rem,4vw,1.9rem);font-weight:700;color:rgba(255,253,208,0.75);letter-spacing:-0.01em;">&#8595; Order Below &#8595;</span>';
         return;
-    }
     }
     if (now >= ORDER_CLOSE) {
         lbl.textContent = '🔒 This Drop Is Closed';
