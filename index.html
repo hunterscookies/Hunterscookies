@@ -1580,15 +1580,11 @@ function tick() {
         if (freeBtn && freeBtn.textContent==='Orders Open Tuesday at 8:00 PM') { freeBtn.textContent='Place Order'; }
     }
     if (diff <= 0 && now < ORDER_CLOSE) {
-        const closing = ORDER_CLOSE - now;
-        const cd = Math.floor(closing/86400000);
-        const ch = Math.floor((closing%86400000)/3600000);
-        const cm = Math.floor((closing%3600000)/60000);
-        const cs = Math.floor((closing%60000)/1000);
-        lbl.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.1rem,3.5vw,1.5rem);font-weight:700;color:#fbbf24;letter-spacing:0.04em;text-transform:uppercase;display:block;text-align:center;">⏳ Order Window Closes In</span>';
-        set(p(cd),p(ch),p(cm),p(cs));
-        sub.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.3rem,4vw,1.9rem);font-weight:700;color:rgba(255,253,208,0.75);letter-spacing:-0.01em;">↓ Order Below ↓</span>';
+        lbl.innerHTML = '<span style="color:#a3e0b0;font-size:1.6rem;font-weight:800;letter-spacing:0.04em;text-transform:none;line-height:1.2;display:block">● Drop Is Live — Order Now!</span>';
+        set('00','00','00','00');
+        sub.innerHTML = '<span style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.3rem,4vw,1.9rem);font-weight:700;color:rgba(255,253,208,0.75);letter-spacing:-0.01em;">↓ Order Below ↓</span>';
         return;
+    }
     }
     if (now >= ORDER_CLOSE) {
         lbl.textContent = '🔒 This Drop Is Closed';
