@@ -2915,7 +2915,7 @@ function syncInventory() {
             inventory.B = data.remaining_b ?? TOTAL;
             inventory.C = data.remaining_c ?? TOTAL;
             if (data.used_emails) data.used_emails.forEach(e => usedEmails.add(e));
-            ['A','B'].forEach(f => {
+            ['A','B','C'].forEach(f => {
                 const el = document.getElementById('soldOut'+f);
                 if (el) el.style.display = inventory[f] <= 0 ? 'inline-block' : 'none';
                 const ov = document.getElementById('soldOutOverlay'+f);
