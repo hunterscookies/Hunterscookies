@@ -2620,9 +2620,9 @@ function renderCart() {
         previewBox.style.display = qty > 0 ? 'block' : 'none';
         if (previewLines) {
             var ph = '';
-            if (cart.A > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Chocolate Chunk <span style='color:var(--muted)'>×${cart.A}</span></span><span>$${ (cart.A*4.5).toFixed(2) }</span></div>`;
-            if (cart.B > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Snickerdoodle <span style='color:var(--muted)'>×${cart.B}</span></span><span>$${ (cart.B*4.5).toFixed(2) }</span></div>`;
-            if (cart.C > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Peanut Butter Cookie <span style='color:var(--muted)'>×${cart.C}</span></span><span>$${ (cart.C*4.5).toFixed(2) }</span></div>`;
+            if (cart.A > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Chocolate Chunk <span style='color:var(--muted);font-size:11px'>($4.50 ea.)</span> <span style='color:var(--muted)'>×${cart.A}</span></span><span>$${ (cart.A*4.5).toFixed(2) }</span></div>`;
+            if (cart.B > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Snickerdoodle <span style='color:var(--muted);font-size:11px'>($4.50 ea.)</span> <span style='color:var(--muted)'>×${cart.B}</span></span><span>$${ (cart.B*4.5).toFixed(2) }</span></div>`;
+            if (cart.C > 0) ph += `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:5px;"><span>Peanut Butter Cookie <span style='color:var(--muted);font-size:11px'>($4.50 ea.)</span> <span style='color:var(--muted)'>×${cart.C}</span></span><span>$${ (cart.C*4.5).toFixed(2) }</span></div>`;
             previewLines.innerHTML = ph;
         }
         if (previewAmt) previewAmt.textContent = `$${ (qty * 4.5).toFixed(2) }`;
