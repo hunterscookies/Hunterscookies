@@ -2437,7 +2437,6 @@ async function submitOrderInquiry() {
     }
     btn.disabled = true; btn.textContent = 'Sending…';
     try {
-    try {
         const name = (_lookedUpOrder && _lookedUpOrder.name) || '';
         const res  = await fetch('https://formsubmit.co/ajax/hunter@hunterscookies.com', {
             method: 'POST',
