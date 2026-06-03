@@ -2444,7 +2444,7 @@ async function submitOrderInquiry() {
     try {
     try {
         const name = (_lookedUpOrder && _lookedUpOrder.name) || '';
-        const res  = await fetch('https://formsubmit.co/ajax/gurnarihunter@gmail.com', {
+        const res  = await fetch('https://formsubmit.co/ajax/hunter@hunterscookies.com', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
@@ -2490,7 +2490,7 @@ async function submitContactForm() {
     if (!message) { showContactAlert('Please write a message.', 'error'); return; }
     btn.disabled = true; btn.textContent = 'Sending…';
     try {
-        const res = await fetch('https://formsubmit.co/ajax/gurnarihunter@gmail.com', {
+        const res = await fetch('https://formsubmit.co/ajax/hunter@hunterscookies.com', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
