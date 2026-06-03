@@ -1581,8 +1581,13 @@ function tick() {
     }
     if (diff <= 0 && now < ORDER_CLOSE) {
         lbl.innerHTML = '<span style="color:#a3e0b0;font-size:1.6rem;font-weight:800;letter-spacing:0.04em;text-transform:none;line-height:1.2;display:block">&#9679; Drop Is Live &#8212; Order Now!</span>';
-        set('00','00','00','00');
-        sub.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.3rem,4vw,1.9rem);font-weight:700;color:rgba(255,253,208,0.75);letter-spacing:-0.01em;">&#8595; Order Below &#8595;</span>';
+        const closeDiff = ORDER_CLOSE - now;
+        const cd = Math.floor(closeDiff/86400000);
+        const ch = Math.floor((closeDiff%86400000)/3600000);
+        const cm = Math.floor((closeDiff%3600000)/60000);
+        const cs = Math.floor((closeDiff%60000)/1000);
+        set(p(cd),p(ch),p(cm),p(cs));
+        sub.innerHTML = '<span style="font-family:\'Cormorant Garamond\',serif;font-size:clamp(1.1rem,3.5vw,1.6rem);font-weight:700;color:rgba(255,253,208,0.75);letter-spacing:-0.01em;">Ordering closes June 11 at 8:00 PM</span>';
         return;
     }
     if (now >= ORDER_CLOSE) {
